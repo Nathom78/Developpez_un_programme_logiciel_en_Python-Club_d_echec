@@ -47,11 +47,6 @@ class Players(list):
     # de la base de donnée stocké ./database/db.json
     players_table = db.table('players')
 
-    def __init__(self, list_players):
-        super().__init__()
-        self.list_players: List[Player]
-        self.save_all(list_players)
-
     def append(self, player):
         if not isinstance(player, Player):
             return ValueError("Joueur mal défini!")
