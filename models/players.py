@@ -2,8 +2,6 @@ import string
 from typing import List
 from tinydb import TinyDB
 
-db = TinyDB('../database/db.json')
-
 
 class Player(dict):
     """ Créer un joueur sous forme de dictionnaire:
@@ -13,11 +11,13 @@ class Player(dict):
         'first_name': "Paul",
         'date_of_birth': "21/06/1969",
         'sex': "M",  # (M ou F)
-        'ranking': 12
+        'ranking_Elo': 12
+        'score:': 0
+
         }
     """
 
-    def __init__(self, family_name, first_name, date_of_birth, sex, ranking=0):
+    def __init__(self, family_name, first_name, date_of_birth, sex, ranking, score=0):
         """Initialise un joueur"""
         super().__init__()
         self['family_name'] = string.capwords(family_name)
@@ -25,44 +25,68 @@ class Player(dict):
         self['date_of_birth'] = date_of_birth
         self['sex'] = sex
         self['ranking'] = ranking
+        self['score'] = score
+        self['score_last_match'] = 0
+        self['Tournaments'] = []
 
     def __str__(self):
-        return f"Joueur {self['first_name']}:\n" \
-               f"- family name : {self['family_name']}\n" \
-               f"- first name : {self['first_name']}\n" \
-               f"- date of birth : {self['date_of_birth']}\n" \
-               f"- sex : {self['sex']}\n" \
-               f"- ranking : {self['ranking']}\n"
+        return f"- family name : {self['family_name']}, " \
+                f"first name : {self['first_name']},\n" \
+                f"- date of birth : {self['date_of_birth']}, " \
+                f"sex : {self['sex']},\n" \
+                f"- ranking : {self['ranking']}, " \
+                f"score : {self['score']},\n" \
+                f"score of the last match :{self['score_last_match']}.\n"
 
     def modify(self):
         pass
 
 
 class Players(list):
-    """
-
+    """ Tout ce qui concernent tous les players de tous les tournois
+    - ajouter un player à la liste class.list_player (append)
+    - sauver dans la base de donnée tous les players class.save_all(nom du tournoi)
+    - afficher la liste class.list_player (print_list)
     """
 
     # attribut de class : nom de la liste des players dans le fichier
     # de la base de donnée stocké ./database/db.json
-    players_table = db.table('players')
+    list_players: List[Player] = []
 
-    def append(self, player):
+    def __init__(self):
+        super().__init__()
+
+    @classmethod
+    def append(cls, player):
         if not isinstance(player, Player):
             return ValueError("Joueur mal défini!")
         return super().append(player)
 
-    def save_all(self, list_players):
-
-        self.players_table.truncate()  # clear the table first
-        self.players_table.insert_multiple(list_players)
+    @classmethod
+    def save_all(cls, name: string):
+        path = f'../database/{name}.json'
+        db = TinyDB(path)
+        players_table = db.table('players')
+        players_table.truncate()  # clear the table first
+        players_table.insert_multiple(cls.list_players)
 
     def load_all(self):
         pass
 
+    @classmethod
+    def print_list_club(cls):
+        list_tom = ""
+        for player in range(len(cls.list_players)):
+            list_tom = list_tom + f"Joueur {player+1}:\n{cls.list_players[player]}\n"
+        return list_tom
 
-list_players_test = []
+
+"""
+tournament = Players
 for i in range(8):
-    list_players_test.append(Player("Lebon", "Paul", "21/06/1969", "M", 15))
-Players().save_all(list_players_test)
+    tournament.list_players.append(Player(f"Lebon{i + 1}", "Paul", "21/06/1969", "M", 15))
+
+print(tournament.print_list_club())
+tournament.save_all('tournament')
+"""
 
