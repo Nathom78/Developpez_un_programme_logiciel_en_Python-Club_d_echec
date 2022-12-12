@@ -2,8 +2,8 @@
 import datetime
 
 
-class PlayerView:
-    """Player view."""
+class View:
+    """view."""
 
     @staticmethod
     def prompt_for_player():
@@ -46,3 +46,22 @@ class PlayerView:
         description = input("description (facultatif) :")
         parameter = [name, place, type_game_time, number_total_round, description]
         return parameter
+
+    def menu_players(self):
+        print("1) Enregistrer un nouveau joueur 2) Liste des joueurs "
+              "3) Modifier un joueur 4) Retour")
+        choice = 0
+        if_number = False
+        while not if_number:
+            choice = input()
+            try:
+                choice = int(choice)
+                if 0 < choice <= 4:  # number max in menu...
+                    if_number = True
+            except ValueError:
+                print("Veuillez taper un nombre entre 1 et 4")
+
+        return choice
+
+
+

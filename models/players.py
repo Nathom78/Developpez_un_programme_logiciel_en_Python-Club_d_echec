@@ -2,6 +2,9 @@ import string
 from typing import List
 from tinydb import TinyDB
 
+#  Path to database Tiny
+PATH = f'../database/tournaments.json'
+
 
 class Player(dict):
     """ Créer un joueur sous forme de dictionnaire:
@@ -20,7 +23,7 @@ class Player(dict):
     def __init__(self, family_name, first_name, date_of_birth, sex, ranking, score=0):
         """Initialise un joueur"""
         super().__init__()
-        self['family_name'] = string.capwords(family_name)
+        self['family_name'] = str.upper(family_name)
         self['first_name'] = string.capwords(first_name)
         self['date_of_birth'] = date_of_birth
         self['sex'] = sex
@@ -31,15 +34,57 @@ class Player(dict):
 
     def __str__(self):
         return f"- family name : {self['family_name']}, " \
-                f"first name : {self['first_name']},\n" \
-                f"- date of birth : {self['date_of_birth']}, " \
-                f"sex : {self['sex']},\n" \
-                f"- ranking : {self['ranking']}, " \
-                f"score : {self['score']},\n" \
-                f"score of the last match :{self['score_last_match']}.\n"
+               f"first name : {self['first_name']},\n" \
+               f"- date of birth : {self['date_of_birth']}, " \
+               f"sex : {self['sex']},\n" \
+               f"- ranking : {self['ranking']}, " \
+               f"score : {self['score']},\n" \
+               f"score of the last match :{self['score_last_match']}.\n"
 
     def modify(self):
         pass
+
+
+class PlayerId:
+    """
+    a player ID give a player dict the players with ID
+    """
+
+    def __init__(self):
+        self.player = Player
+
+    def print_list_player_sort_abc(self, list_players_id):
+        list_players = self.ids_to_dicts(list_players_id)
+        list_sort = sorted(list_players, key=lambda player: player['family_name'])
+        for x in range(len(list_sort)):
+            print(f"Joueur {x + 1}:\n{list_sort[x]}")
+
+    def print_list_player_sort_rank(self, list_players_id):
+        list_players = self.ids_to_dicts(list_players_id)
+        list_sort = sorted(list_players, key=lambda player: player['ranking'],
+                           reverse=True)
+        for x in range(len(list_sort)):
+            print(f"Joueur {x + 1}:\n{list_sort[x]}")
+
+    def id_to_dict(self, player_id):
+        db = TinyDB(PATH)
+        players_table = db.table('players')
+        self.player = players_table.get(doc_id=player_id)
+        return self.player
+
+    def ids_to_dicts(self, list_players_id):
+        list_players = Players()
+        for player_id in list_players_id:
+            dict_player = self.id_to_dict(player_id)
+            try:
+                player_temp = Player(dict_player['family_name'], dict_player['first_name'],
+                                     dict_player['date_of_birth'], dict_player['sex'],
+                                     dict_player['ranking'], dict_player['score'])
+            except (KeyError, TypeError,):
+                print(f"Base de donnée incorrect pour joueur {player_id}")
+            else:
+                list_players.add(player_temp)
+        return list_players
 
 
 class Players(list):
@@ -57,15 +102,14 @@ class Players(list):
         super().__init__()
 
     @classmethod
-    def append(cls, player):
+    def add(cls, player):
         if not isinstance(player, Player):
-            return ValueError("Joueur mal défini!")
-        return super().append(player)
+            raise ValueError("Joueur mal défini!")
+        cls.list_players.append(player)
 
     @classmethod
-    def save_all(cls, name: string):
-        path = f'../database/{name}.json'
-        db = TinyDB(path)
+    def save_all(cls):
+        db = TinyDB(PATH)
         players_table = db.table('players')
         players_table.truncate()  # clear the table first
         players_table.insert_multiple(cls.list_players)
@@ -77,9 +121,12 @@ class Players(list):
     def print_list_club(cls):
         list_tom = ""
         for player in range(len(cls.list_players)):
-            list_tom = list_tom + f"Joueur {player+1}:\n{cls.list_players[player]}\n"
+            list_tom = list_tom + f"Joueur {player + 1}:\n{cls.list_players[player]}\n"
         return list_tom
 
+
+adidas = PlayerId()
+adidas.print_list_player_sort_rank([1, 2, 3, 4, 5, 6, 7, 8])
 
 """
 tournament = Players
@@ -89,4 +136,3 @@ for i in range(8):
 print(tournament.print_list_club())
 tournament.save_all('tournament')
 """
-

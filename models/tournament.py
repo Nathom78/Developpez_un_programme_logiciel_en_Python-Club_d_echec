@@ -7,24 +7,24 @@ class Tournaments(list):
 
     def __init__(self):
         super().__init__()
-        self.tournament: List[Tournament] = []
+        self.tournaments: List[Tournament] = []
 
     def save_all(self):
-        for element in self.tournament:
+        for element in self.tournaments:
             name = element['name']
-            path = f'../database/{name}.json'
+            path = f'../database/tournaments.json'
             db = TinyDB(path)
-            players_table = db.table('players')  # pour les joueurs
-            players_table.truncate()  # clear the table first
-            players_table.insert_multiple(element['list_players'])
-            tournaments_table = db.table('tournaments')  # pour les tournois regroupant tout
-            tournaments_table.insert_multiple(self.tournament)
+            tournaments_table = db.table(name)  # pour les tournois regroupant tout
+            tournaments_table.insert_multiple(self.tournaments)
+
+    def load_all(self):
+        pass
 
 
 class Tournament(dict):
     """
     Chaque tournoi doit contenir au moins les informations suivantes :
-    ●	Nom :
+    ●	Nom : (unique)
     ●	Lieu :
     ●	Date de création :
         ○	Jusqu'à présent, tous nos tournois sont des événements d'un jour,
@@ -57,11 +57,11 @@ class Tournament(dict):
 
     def __str__(self):
         return f"\nLe tournoi {self['name']} de {self['place']} commencé le " \
-                f"{self['date_creation']}\n"\
-                f"avec {self['number_total_round']} ronde, le type du jeux est "  \
-                f" {self['type_game_time']}\n" \
-                f"liste des rounds : {self['Rounds']}\n" \
-                f"liste des joueurs : {self['players']}"
+               f"{self['date_creation']}\n" \
+               f"avec {self['number_total_round']} ronde, le type du jeux est " \
+               f" {self['type_game_time']}\n" \
+               f"liste des rounds : {self['Rounds']}\n" \
+               f"liste des joueurs : {self['players']}"
 
     def tournament_players(self, list_player):
         self['players'] = list_player
