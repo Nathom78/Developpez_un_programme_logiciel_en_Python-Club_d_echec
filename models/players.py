@@ -70,64 +70,36 @@ class Player(dict):
 class PlayerId:
     """
     a player ID give a player dict, the players with ID is écolo
-    avec une list des ID des players d'un tournoi
+    avec une list des ID des players du club
 
     Pour l'instant je ne sais pas si j'aurais besoin d'instance de PlayerId sinon faire des
     @classmethod
     """
+    players_IDs = []
 
-    def __init__(self):
-        self.players_IDs = []
-
-    def print_list_player_sort_abc(self, list_players_id):  # à faire mieux et ménage
-        list_players = self.ids_to_dicts(list_players_id)
+    @classmethod
+    def print_list_player_sort_abc(cls, list_players_id):  # à faire mieux et ménage
+        list_players = cls.ids_to_dicts(list_players_id)
         list_sort = sorted(list_players, key=lambda player: player['family_name'])
         for x in range(len(list_sort)):
             print(f"Joueur {x + 1}:\n{list_sort[x]}")
 
-    def print_list_player_sort_rank(self, list_players_id):  # à faire mieux et ménage
-        players = self.ids_to_dicts(list_players_id)
+    @classmethod
+    def print_list_player_sort_rank(cls, list_players_id):  # à faire mieux et ménage
+        players = cls.ids_to_dicts(list_players_id)
 
         players_sorted = sorted(players, key=lambda player: player['ranking'],
                                 reverse=True)
         for x in range(len(players_sorted)):
             print(f"Joueur {x + 1}:\n{players_sorted[x]}")
 
-    def print_list_club(self, sort=0):
-        """ Retourne une liste prête à être affiché, de tous les joueurs
-        sort = 1 : rangé par ordre alphabétique
-        sort = 2 : rangé par score
-        sort = 0 : ordre de la base
-        """
-        if sort == 1:
-            self.print_list_player_sort_abc(self.players_IDs)
-        elif sort == 2:
-            self.print_list_player_sort_rank(self.players_IDs)
-        else:
-            list_player = self.ids_to_dicts(self.players_IDs)
-            for player in range(len(list_player)):
-                print(f"Joueur {player + 1}:\n{list_player[player]}")
-
-    def load_all(self):
-        # voir remplacer par une liste des IDs de la BD
-        db = TinyDB(PATH)
-        players_table = db.table(NAME_PLAYERS_TABLE)
-        list_temp = players_table.all()
-        self.players_IDs = []
-        for document in list_temp:
-            try:
-                Player.correspond_player(document)
-            except ValueError:
-                print(ValueError)
-            finally:
-                self.players_IDs.append(document.doc_id)
-
-    def ids_to_dicts(self, list_players_id):  # à faire mieux et ménage Players.list_player
+    @classmethod
+    def ids_to_dicts(cls, list_players_id):  # à faire mieux et ménage Players.list_player
         """ Liste de joueur ID, retourne une liste de Player(dict)"""
         list_player = []
         player = {}
         for player_id in list_players_id:
-            dict_player = self.id_to_dict(player_id)
+            dict_player = cls.id_to_dict(player_id)
             try:
                 player = Player.correspond_player(dict_player)
             except ValueError:
@@ -135,6 +107,37 @@ class PlayerId:
             finally:
                 list_player.append(player)
         return list_player
+
+    @classmethod
+    def print_list_club(cls, sort=0):
+        """ Retourne une liste prête à être affiché, de tous les joueurs
+        sort = 1 : rangé par ordre alphabétique
+        sort = 2 : rangé par score
+        sort = 0 : ordre de la base
+        """
+        if sort == 1:
+            cls.print_list_player_sort_abc(cls.players_IDs)
+        elif sort == 2:
+            cls.print_list_player_sort_rank(cls.players_IDs)
+        else:
+            list_player = cls.ids_to_dicts(cls.players_IDs)
+            for player in range(len(list_player)):
+                print(f"Joueur {player + 1}:\n{list_player[player]}")
+
+    @classmethod
+    def load_all(cls):
+        # voir remplacer par une liste des IDs de la BD
+        db = TinyDB(PATH)
+        players_table = db.table(NAME_PLAYERS_TABLE)
+        list_temp = players_table.all()
+        cls.players_IDs = []
+        for document in list_temp:
+            try:
+                Player.correspond_player(document)
+            except ValueError:
+                print(ValueError)
+            finally:
+                cls.players_IDs.append(document.doc_id)
 
     @staticmethod
     def id_to_dict(player_id):
