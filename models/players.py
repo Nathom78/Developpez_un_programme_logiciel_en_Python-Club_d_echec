@@ -67,7 +67,7 @@ class Player(dict):
         players_table.insert(player)
 
 
-class PlayerId:
+class PlayersId:
     """
     a player ID give a player dict, the players with ID is écolo
     avec une list des ID des players du club
@@ -115,6 +115,7 @@ class PlayerId:
         sort = 2 : rangé par score
         sort = 0 : ordre de la base
         """
+        cls.load_all()
         if sort == 1:
             cls.print_list_player_sort_abc(cls.players_IDs)
         elif sort == 2:
@@ -150,7 +151,7 @@ class PlayerId:
 # for i in range(8):
 #    Player.save(Player(f"Lebon{i + 1}", "Paul", "21/06/1969", "M", 15 + i))
 
-# adidas = PlayerId()
+# adidas = PlayersId()
 # adidas.load_all()
 # tom = adidas.players_IDs
 # print(adidas.players_IDs)

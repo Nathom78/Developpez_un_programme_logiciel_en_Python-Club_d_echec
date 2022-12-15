@@ -47,7 +47,8 @@ class View:
         parameter = [name, place, type_game_time, number_total_round, description]
         return parameter
 
-    def menu_players(self):
+    @staticmethod
+    def menu_manage_club():
         print("1) Enregistrer un nouveau joueur 2) Liste des joueurs "
               "3) Modifier un joueur 4) Retour")
         choice = 0
@@ -60,7 +61,6 @@ class View:
                     if_number = True
             except ValueError:
                 print("Veuillez taper un nombre entre 1 et 4")
-
         return choice
 
 
