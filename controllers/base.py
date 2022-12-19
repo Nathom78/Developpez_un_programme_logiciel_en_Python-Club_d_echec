@@ -17,17 +17,20 @@ class ControllerTournaments:
         self.view = view
 
         # manage players' club
-        self.menu = controller_menu.run()
+        self.menu = controller_menu.run
 
         # method calcul ronde
         self.method_calcul_round = method_calcul_round
 
     def get_players(self):
+        """
+        :return: list of NUMBER_OF_PLAYER IDs
+        """
         while len(self.players) < NUMBER_OF_PLAYERS:
             parameter = self.view.prompt_for_player()
             if not parameter:
                 return
-            player = Player(*parameter)  # à remplacer avec ID du player
+            player = PlayersId.id_to_dict(Player(*parameter))
             self.players.append(player)
 
     def menu_players_and_lists(self):
@@ -35,6 +38,7 @@ class ControllerTournaments:
 
     def run(self):
 
+        self.menu
         parameter = self.view.prompt_for_tournament()
         new_tournament = Tournament(*parameter)
         # ajouter un tournoi à la liste tournaments

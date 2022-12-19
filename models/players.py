@@ -17,7 +17,6 @@ class Player(dict):
         'sex': "M",  # (M ou F)
         'ranking_Elo': 12
         'score:': 0
-
         }
     """
 
@@ -64,16 +63,13 @@ class Player(dict):
         players_table = db.table(NAME_PLAYERS_TABLE)
         if not isinstance(player, Player):
             return ValueError("Joueur mal défini!")
-        players_table.insert(player)
+        return players_table.insert(player)
 
 
 class PlayersId:
     """
     a player ID give a player dict, the players with ID is écolo
     avec une list des ID des players du club
-
-    Pour l'instant je ne sais pas si j'aurais besoin d'instance de PlayerId sinon faire des
-    @classmethod
     """
     players_IDs = []
 
@@ -81,8 +77,10 @@ class PlayersId:
     def print_list_player_sort_abc(cls, list_players_id):  # à faire mieux et ménage
         list_players = cls.ids_to_dicts(list_players_id)
         list_sort = sorted(list_players, key=lambda player: player['family_name'])
+        text = ""
         for x in range(len(list_sort)):
-            print(f"Joueur {x + 1}:\n{list_sort[x]}")
+            text += f"Joueur {x + 1}:\n{list_sort[x]}"
+        return text
 
     @classmethod
     def print_list_player_sort_rank(cls, list_players_id):  # à faire mieux et ménage
@@ -90,8 +88,10 @@ class PlayersId:
 
         players_sorted = sorted(players, key=lambda player: player['ranking'],
                                 reverse=True)
+        text = ""
         for x in range(len(players_sorted)):
-            print(f"Joueur {x + 1}:\n{players_sorted[x]}")
+            text += f"Joueur {x + 1}:\n{players_sorted[x]}"
+        return text
 
     @classmethod
     def ids_to_dicts(cls, list_players_id):  # à faire mieux et ménage Players.list_player
@@ -116,14 +116,16 @@ class PlayersId:
         sort = 0 : ordre de la base
         """
         cls.load_all()
+        text = ""
         if sort == 1:
-            cls.print_list_player_sort_abc(cls.players_IDs)
+            text = cls.print_list_player_sort_abc(cls.players_IDs)
         elif sort == 2:
-            cls.print_list_player_sort_rank(cls.players_IDs)
+            text = cls.print_list_player_sort_rank(cls.players_IDs)
         else:
             list_player = cls.ids_to_dicts(cls.players_IDs)
             for player in range(len(list_player)):
-                print(f"Joueur {player + 1}:\n{list_player[player]}")
+                text = f"Joueur {player + 1}:\n{list_player[player]}"
+        return text
 
     @classmethod
     def load_all(cls):

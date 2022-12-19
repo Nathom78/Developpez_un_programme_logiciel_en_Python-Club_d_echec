@@ -1,24 +1,10 @@
-from typing import List, Tuple
+from typing import List, Tuple, Any
 from time import strftime
 from tinydb import TinyDB
 
-
-class Tournaments(list):
-
-    def __init__(self):
-        super().__init__()
-        self.tournaments: List[Tournament] = []
-
-    def save_all(self):
-        for element in self.tournaments:
-            name = element['name']
-            path = f'../database/tournaments.json'
-            db = TinyDB(path)
-            tournaments_table = db.table(name)  # pour les tournois regroupant tout
-            tournaments_table.insert_multiple(self.tournaments)
-
-    def load_all(self):
-        pass
+PATH = '../database/tournaments.json'
+NAME_PLAYERS_TABLE = 'players'
+NAME_TOURNAMENTS_TABLE = 'Tournaments'
 
 
 class Tournament(dict):
@@ -46,7 +32,7 @@ class Tournament(dict):
                  description="", date=strftime('%d/%m/%Y')):
         super().__init__()
         self['name'] = name
-        self['Rounds']: List[Round] = []
+        self['rounds']: List[Round] = []
         self['place'] = place
         self['date_creation'] = date
         self['date_end'] = ""
@@ -60,11 +46,112 @@ class Tournament(dict):
                f"{self['date_creation']}\n" \
                f"avec {self['number_total_round']} ronde, le type du jeux est " \
                f" {self['type_game_time']}\n" \
-               f"liste des rounds : {self['Rounds']}\n" \
+               f"liste des rounds : {self['rounds']}\n" \
                f"liste des joueurs : {self['players']}"
 
     def tournament_players(self, list_player):
         self['players'] = list_player
+
+    def save(self):
+        name = self['name']
+        db = TinyDB(PATH)
+        tournaments_table = db.table(name)  # pour le tournoi regroupant tout
+        tournaments_table.insert(self)
+
+    @staticmethod
+    def correspond_tournament(tournament_temp: dict):
+        """ Test and put data from BD, in instance of Tournament"""
+        tournament = {}
+        try:
+            tournament = Tournament(tournament_temp['name'],
+                                    tournament_temp['place'],
+                                    tournament_temp['type_game_time'],
+                                    tournament_temp['number_total_round'],
+                                    tournament_temp['description'],
+                                    tournament_temp['date_creation'])
+            tournament['date_end'] = tournament_temp['date_end']
+            tournament['players'] = tournament_temp['players']
+            tournament['rounds'] = tournament_temp['rounds']
+        except(KeyError, TypeError,):
+            print(f"Base de donnée incorrect pour le joueur {tournament_temp}")
+        finally:
+            if not isinstance(tournament, Tournament):
+                raise ValueError("tournoi mal défini!")
+        return tournament
+
+    @staticmethod
+    def load(name):
+        """
+        :param name: #name of the tournament to load
+        :return: an instance of the tournament
+        """
+        db = TinyDB(PATH)
+        tournament_table = db.table(name)  # pour le tournoi regroupant tout
+        tournament_db = tournament_table.all()
+        tournament = Tournament.correspond_tournament(tournament_db[0])
+        if not isinstance(tournament, Tournament):
+            raise ValueError("Tournament in DB not correct")
+        return tournament
+
+
+class Tournaments(list):
+    """
+    Tournament's name list
+    Tournament_actif list for extension (case of multiple tournament in same time)
+    """
+
+    list_tournament = []
+    tournaments_actif: List[Tournament] = []
+
+    def __init__(self):
+        super().__init__()
+
+    @classmethod
+    def add_db_tournament(cls, tournament):
+        """ Add name of tournament in table tournaments
+            And become active"""
+        db = TinyDB(PATH)
+        tournaments_table = db.table(NAME_TOURNAMENTS_TABLE)  # pour les tournois regroupant tout
+        tournaments_table.insert(tournament['name'])
+        cls.tournaments_actif.append(tournament)
+
+    @classmethod
+    def save_all(cls):  # pas bon
+        """
+        save list of name of tournament
+        :return: ok
+        """
+        for element in cls.tournaments_actif:
+            db = TinyDB(PATH)
+            tournaments_table = db.table(NAME_TOURNAMENTS_TABLE)  # pour le tournoi regroupant tout
+            tournaments_table.insert_multiple(element['name'])
+        return
+
+    @classmethod
+    def load_all(cls):
+        """
+        :return: Load in list_of_tournament all the names of existing tournaments
+        """
+        db = TinyDB(PATH)
+        tournaments_table = db.table(NAME_TOURNAMENTS_TABLE)
+        list_tables = db.tables()
+        cls.list_tournament = []
+        list_temp = tournaments_table.all()
+        for document in list_temp:
+            if document in list_tables:
+                cls.list_tournament.append(document)
+            else:
+                print(ValueError(f"Tournament {document} incorrectly saving"))
+
+    @classmethod
+    def print_all(cls):
+        """
+        :return: -> str text with all tournament for print
+        """
+        text = ""
+        for x in range(len(cls.list_tournament)):
+            text += f"Tournoi {cls.list_tournament[x]}:\n{Tournament.load(cls.list_tournament[x])}"
+        return text
 
 
 class Round(list):
@@ -100,10 +187,9 @@ class Match:
     une référence à une instance de joueur et un score
     """
 
-    resultat_match: Tuple = None
-
     def __init__(self, couple_players):
         self.couple_players = couple_players
+        self.resultat_match: Tuple = ()
 
     def match_resultat(self):
         player1 = self.couple_players[0]
