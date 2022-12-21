@@ -29,7 +29,9 @@ class Player(dict):
         self['sex'] = sex
         self['ranking'] = ranking
         self['score'] = score
-        self['Tournaments'] = []
+        self['tournaments'] = []
+        self['opponents'] = []
+        self['score_last_match'] = 0
 
     def __str__(self):
         return f"- family name : {self['family_name']}, " \
@@ -37,9 +39,15 @@ class Player(dict):
                f"- date of birth : {self['date_of_birth']}, " \
                f"sex : {self['sex']},\n" \
                f"- ranking : {self['ranking']}, " \
-               f"score : {self['score']}.\n"
+               f"score : {self['score']},\n"\
+               f"- tournaments played : {self['tournaments']}.\n"
 
     def modify(self):
+
+
+
+
+
         pass
 
     @staticmethod
@@ -50,6 +58,10 @@ class Player(dict):
             player = Player(player_temp['family_name'], player_temp['first_name'],
                             player_temp['date_of_birth'], player_temp['sex'],
                             player_temp['ranking'], player_temp['score'])
+            player['tournaments'] = player_temp['tournaments']
+            player['opponents'] = player_temp['opponents']
+            player['score_last_match'] = player_temp['score_last_match']
+
         except(KeyError, TypeError,):
             print(f"Base de donnée incorrect pour le joueur {player_temp}")
         finally:
@@ -129,6 +141,11 @@ class PlayersId:
 
     @classmethod
     def load_all(cls):
+        """
+        :return: nothing
+        But a list of id's players in DB,
+        stocked in class attribut Player_IDs
+        """
         # voir remplacer par une liste des IDs de la BD
         db = TinyDB(PATH)
         players_table = db.table(NAME_PLAYERS_TABLE)

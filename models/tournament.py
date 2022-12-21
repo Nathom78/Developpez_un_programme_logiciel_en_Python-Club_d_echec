@@ -1,6 +1,7 @@
-from typing import List, Tuple, Any
+from typing import List, Tuple
 from time import strftime
 from tinydb import TinyDB
+from players import PlayersId
 
 PATH = '../database/tournaments.json'
 NAME_PLAYERS_TABLE = 'players'
@@ -170,7 +171,7 @@ class Round(list):
         self.starting_date = strftime('%d/%m/%Y')
         self.starting_time = strftime('%H:%M:%S')
         self.finish_time = ""
-        self.list_matches_finishing = None
+        self.list_matches_resultat = ()
         self.couples_players = []
         self.list_matches = []
 
@@ -192,9 +193,11 @@ class Match:
         self.resultat_match: Tuple = ()
 
     def match_resultat(self):
-        player1 = self.couple_players[0]
-        player2 = self.couple_players[1]
+        player1_id = self.couple_players[0]
+        player2_id = self.couple_players[1]
+        player1 = PlayersId.id_to_dict(player1_id)
+        player2 = PlayersId.id_to_dict(player2_id)
         player1_resultat = player1['score_last_match']
         player2_resultat = player2['score_last_match']
-        self.resultat_match = ([player1, player1_resultat], [player2, player2_resultat])
+        self.resultat_match = ([player1_id, player1_resultat], [player2_id, player2_resultat])
         return self.resultat_match

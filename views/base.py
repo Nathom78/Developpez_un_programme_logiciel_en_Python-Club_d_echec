@@ -1,5 +1,7 @@
 """Base view."""
+
 import datetime
+import string
 
 
 class View:
@@ -53,7 +55,7 @@ class View:
         if_str = False
         while not if_str:
             family_name = input("tapez le nom de famille du joueur :")
-            try:
+            try:  # remplacer par if
                 if_str = family_name.isalpha()
             except ValueError:
                 print("Veuillez mettre seulement des lettres")
@@ -62,7 +64,7 @@ class View:
         if_str = False
         while not if_str:
             first_name = input("tapez le prénom du joueur :")
-            try:
+            try:  # remplacer par if
                 if_str = first_name.isalpha()
             except ValueError:
                 print("Veuillez mettre seulement des lettres")
@@ -103,7 +105,7 @@ class View:
             if score == "":
                 score = 0
             try:
-                score = int(ranking)
+                score = int(score)
                 if_number = True
             except ValueError:
                 print("Veuillez taper un nombre")
@@ -151,9 +153,9 @@ class View:
 
     @staticmethod
     def menu_manage_club_case_2_print(text):
-        """ Print List of all Players' Club"""
+        """ Print text"""
         print(text)
-        pass
+        return
 
     @staticmethod
     def menu_manage_club_case_2_2_choice(tournaments):
@@ -176,19 +178,130 @@ class View:
                     if_number = True
             except ValueError:
                 print(f"Veuillez entrer un nombre entre 1 et {i}")
+        return tournaments[choice - 1]
+
+    @staticmethod
+    def menu_manage_club_case_3_1(text, i):
+        """ Choice Player to modify"""
+        print(text)
+        choice = 0
+        if_number = False
+        while not if_number:
+            choice = input("Entrer le numéro du joueur à modifier")
+            try:
+                choice = int(choice)
+                if 0 < choice <= i:
+                    if_number = True
+            except ValueError:
+                print(f"Veuillez entrer un nombre entre 1 et {i}")
+        return choice
+
+    @staticmethod
+    def menu_manage_club_case_3_2(player):
+        """
+        Prompt for modify a Player
+        :param player:
+        :return: player modify
+        """
+
+        print('Entrer une nouvelle valeur ou juste taper la touche "Entrée" :')
+        player_modify = player
+        if_str = False
+        while not if_str:
+            family_name = input(f"- nom de famille du joueur : {player['family_name']} :")
+            if family_name == "":
+                if_str = True
+            elif family_name.isalpha():
+                player_modify['family_name'] = str.upper(family_name)
+                if_str = True
+            else:
+                print("Veuillez mettre seulement des lettres")
+
+        if_str = False
+        while not if_str:
+            first_name = input(f"tapez le prénom du joueur : {player['first_name']} :")
+            if first_name == "":
+                if_str = True
+            elif first_name.isalpha():
+                player_modify['first_name'] = string.capwords(first_name)
+                if_str = True
+            else:
+                print("Veuillez mettre seulement des lettres")
+
+        if_date = False
+        while not if_date:
+            date_of_birth = input("tapez la date de naissance du joueur (dd/mm/yyyy) : "
+                                  f"{player['date_of_birth']} : ")
+            try:
+                if date_of_birth != "":
+                    datetime.datetime.strptime(date_of_birth, '%d/%m/%Y')
+                    player_modify['date_of_birth'] = date_of_birth
+                if_date = True
+            except ValueError:
+                print("Incorrect data format, should be dd/mm/yyyy")
+
+        if_sex = False
+        while not if_sex:
+            sex = input(f"tapez le genre du joueur (M ou F) :{player['sex']} :")
+            if sex == ("M" or "F" or "m" or "f"):
+                player_modify['sex'] = sex
+                if_sex = True
+            elif sex == "":
+                if_sex = True
+            else:
+                print("Mauvaise lettre")
+
+        if_number = False
+        while not if_number:
+            ranking = input(f"taper le score (rang Elo) : {player['ranking']} :")
+            try:
+                if ranking == '':
+                    if_number = True
+                else:
+                    ranking = int(ranking)
+                    player_modify['ranking'] = ranking
+                    if_number = True
+            except ValueError:
+                print("Veuillez taper un nombre")
+
+        if_number = False
+        while not if_number:
+            score = input("Rentrer le score total du tournoi :"
+                          f" {player['score']}")
+            if score == "":
+                if_number = True
+            try:
+                score = int(score)
+                player_modify['score'] = score
+                if_number = True
+            except ValueError:
+                print("Veuillez taper un nombre")
+
+        return player_modify
+
+    @staticmethod
+    def menu_manage_club_case_4_choice(tournaments):
+        """Choice of the tournament to save
+        :param tournaments: Tournaments.tournaments_actifs
+        :return: the tournament
+        """
+        i = 0
+        for tournament in tournaments:
+            i += 1
+            print(f"choix {i} :\n" + tournament)
+        choice = 0
+        if_number = False
+        while not if_number:
+            choice = input("Entrer le numéro du tournoi à sauvegarder")
+            try:
+                choice = int(choice)
+                if 0 < choice <= i:
+                    if_number = True
+            except ValueError:
+                print(f"Veuillez entrer un nombre entre 1 et {i}")
         return tournaments[choice-1]
 
     @staticmethod
-    def menu_manage_club_case_2_3():
-        """ Print List of all tournaments"""
-        pass
-
-    @staticmethod
-    def menu_manage_club_case_2_4():
-        """ Print List of all rounds"""
-        pass
-
-    @staticmethod
-    def menu_manage_club_case_2_5():
-        """ Print List of all matches"""
-        pass
+    def menu_manage_club_case_4_done(tournament_name):
+        print(f"Tournoi {tournament_name} sauvegardé")
+        return
