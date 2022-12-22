@@ -2,10 +2,29 @@
 
 import datetime
 import string
+import os
 
 
 class View:
     """view."""
+
+    @staticmethod
+    def ask_start():
+        """Starting Tournament New tournament or load
+        :return choice:
+        """
+        print("1) Nouveau tournoi\n2) Charger un tournoi")
+        choice = 0
+        if_number = False
+        while not if_number:
+            choice = input(":")
+            try:
+                choice = int(choice)
+                if 0 < choice <= 2:  # number max in menu...
+                    if_number = True
+            except ValueError:
+                print("Veuillez taper un nombre entre 1 et 2")
+        return choice
 
     @staticmethod
     def prompt_for_tournament():
@@ -19,11 +38,14 @@ class View:
         return parameter
 
     @staticmethod
-    def make_list_player_from_db():
+    def make_list_player_from_db(text):
         """ Afficher la liste des joueurs et choisir x joueurs
         Return : List ID's players for tournament
         """
-        pass
+        View.clear_screen()
+        print(text)
+        number_in_list = input(":")
+        return number_in_list
 
     # Menu Club Manage
     @staticmethod
@@ -31,18 +53,18 @@ class View:
         """
         Return : choix dans le menu
         """
-        print("1) Enregistrer un nouveau joueur 2) Liste des joueurs "
-              "3) Modifier un joueur 4) Retour")
+        print("1) Enregistrer un nouveau joueur\n2) Liste des joueurs\n"
+              "3) Modifier un joueur\n4) Enregistrer le tournoi\n5) Retour")
         choice = 0
         if_number = False
         while not if_number:
-            choice = input()
+            choice = input(":")
             try:
                 choice = int(choice)
-                if 0 < choice <= 4:  # number max in menu...
+                if 0 < choice <= 5:  # number max in menu...
                     if_number = True
             except ValueError:
-                print("Veuillez taper un nombre entre 1 et 4")
+                print("Veuillez taper un nombre entre 1 et 5")
         return choice
 
     @staticmethod
@@ -142,7 +164,7 @@ class View:
         sort = 0
         if_number = False
         while not if_number:
-            sort = input()
+            sort = input(":")
             try:
                 sort = int(sort)
                 if 0 < sort <= 2:  # number max in menu...
@@ -160,18 +182,18 @@ class View:
     @staticmethod
     def menu_manage_club_case_2_2_choice(tournaments):
         """
-        Choice from the list of tournaments
+        Choice from the list of tournaments' names
         :return: name of the tournament to print
         """
-        print("Choisir un tournoi pour afficher sa liste de joueur")
+        print("Choisir un tournoi")
         i = 0
         for tournament in tournaments:
             i += 1
-            print(f"{i}) {tournament}")
+            print(f"{i}) {tournament}\n")
         choice = 0
         if_number = False
         while not if_number:
-            choice = input("Entrer le numéro du tournoi")
+            choice = input("Entrer le numéro du tournoi :")
             try:
                 choice = int(choice)
                 if 0 < choice <= i:
@@ -187,7 +209,7 @@ class View:
         choice = 0
         if_number = False
         while not if_number:
-            choice = input("Entrer le numéro du joueur à modifier")
+            choice = input("Entrer le numéro du joueur à modifier :")
             try:
                 choice = int(choice)
                 if 0 < choice <= i:
@@ -280,6 +302,11 @@ class View:
         return player_modify
 
     @staticmethod
+    def menu_manage_club_case_3_3(text):
+        """ print modify state"""
+        print(text)
+
+    @staticmethod
     def menu_manage_club_case_4_choice(tournaments):
         """Choice of the tournament to save
         :param tournaments: Tournaments.tournaments_actifs
@@ -292,7 +319,7 @@ class View:
         choice = 0
         if_number = False
         while not if_number:
-            choice = input("Entrer le numéro du tournoi à sauvegarder")
+            choice = input("Entrer le numéro du tournoi à sauvegarder :")
             try:
                 choice = int(choice)
                 if 0 < choice <= i:
@@ -305,3 +332,12 @@ class View:
     def menu_manage_club_case_4_done(tournament_name):
         print(f"Tournoi {tournament_name} sauvegardé")
         return
+
+    @staticmethod
+    def clear_screen():
+        # It is for macOS and Linux(here, os.name is 'posix')
+        if os.name == 'posix':
+            _ = os.system('clear')
+        else:
+            # It is for Windows platform
+            _ = os.system('cls')

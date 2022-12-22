@@ -19,6 +19,7 @@ class ControllerMenuPlayersLists:
         player = Player(*attribut_player)
         # enregistrer dans la base
         player_id = Player.save(player)
+
         PlayersId.players_IDs.append(player_id)
         return
 
@@ -98,10 +99,20 @@ class ControllerMenuPlayersLists:
     def case_3(self):  # 3) Modifier un joueur
         text = PlayersId.print_list_club()
         nb_player = len(PlayersId.players_IDs)
-        player_id = self.view.menu_manage_club_case_2_print(text, nb_player)
+        player_id = self.view.menu_manage_club_case_3_1(text, nb_player)
         player = PlayersId.id_to_dict(player_id)
         player_modify = self.view.menu_manage_club_case_3_2(player)
-        Player.modify(player_modify)
+        try:
+            ok = Player.modify(player_modify, player_id)
+            if ok == "ok":
+                text = f"Joueur {player_modify['family_name']}" \
+                       f" {player_modify['first_name']} est bien modifié"
+        except ValueError:
+            text = f"Joueur {player_modify['family_name']} " \
+                   f"{player_modify['first_name']} n'a pas été enregistré, veuillez avertir " \
+                   "l'administrateur"
+        finally:
+            self.view.menu_manage_club_case_3_3(text)
 
     def case_4(self):  # 4) Enregistrer
         tournaments = Tournaments.tournaments_actif
@@ -125,6 +136,6 @@ class ControllerMenuPlayersLists:
     def run(self):
         menu = ""
         while menu != 'quit':
-            choice = self.view.menu_players
+            choice = self.view.menu_manage_club()
             menu = self.choice(choice)
         return

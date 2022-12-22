@@ -42,14 +42,6 @@ class Player(dict):
                f"score : {self['score']},\n"\
                f"- tournaments played : {self['tournaments']}.\n"
 
-    def modify(self):
-
-
-
-
-
-        pass
-
     @staticmethod
     def correspond_player(player_temp: dict):
         """ Test and put data from BD, in instance of Player"""
@@ -74,8 +66,29 @@ class Player(dict):
         db = TinyDB(PATH)
         players_table = db.table(NAME_PLAYERS_TABLE)
         if not isinstance(player, Player):
-            return ValueError("Joueur mal défini!")
+            raise ValueError("Joueur mal défini!")
         return players_table.insert(player)
+
+    @staticmethod
+    def modify(player_modify, player_id):
+        """
+        Update in DB, the player with ID player_id.
+        :param player_modify:
+        :param player_id:
+        :return: ok or error
+        """
+        try:
+            if not isinstance(player_modify, Player):
+                player_modify = Player.correspond_player(player_modify)
+            if isinstance(player_modify, Player):
+                db = TinyDB(PATH)
+                players_table = db.table(NAME_PLAYERS_TABLE)
+                doc_id_return = players_table.update(player_modify, doc_ids=player_id)
+                if doc_id_return == player_id:
+                    return "ok"
+        except ValueError as error:
+            print("Uh oh, unexpected error occurred!")
+            raise error
 
 
 class PlayersId:
@@ -163,7 +176,7 @@ class PlayersId:
     def id_to_dict(player_id):
         """ Joueur avec ID, retourne un document de la BD valide ou pas"""
         db = TinyDB(PATH)
-        players_table = db.table('players')
+        players_table = db.table(NAME_PLAYERS_TABLE)
         return players_table.get(doc_id=player_id)
 
 
