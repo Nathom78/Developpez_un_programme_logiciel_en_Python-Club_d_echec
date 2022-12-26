@@ -139,3 +139,4 @@ class ControllerMenuPlayersLists:
             choice = self.view.menu_manage_club()
             menu = self.choice(choice)
         return
+

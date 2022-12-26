@@ -39,12 +39,23 @@ class View:
 
     @staticmethod
     def make_list_player_from_db(text):
-        """ Afficher la liste des joueurs et choisir x joueurs
+        """ Afficher la liste des joueurs et choisir 1 joueur
         Return : List ID's players for tournament
         """
         View.clear_screen()
         print(text)
-        number_in_list = input(":")
+        print("Entrer le numéro du joueur, ou 0 pour ajouter un nouveau")
+        if_number = False
+        number_in_list = 0
+        while not if_number:
+            number_in_list = input(":")
+            try:
+                number_in_list = int(number_in_list)
+                if 0 <= number_in_list:
+                    if_number = True
+            except ValueError:
+                print("Veuillez taper un nombre")
+
         return number_in_list
 
     # Menu Club Manage
@@ -71,7 +82,7 @@ class View:
     def menu_manage_club_case_1():
         """Prompt for player.
         family_name, first_name, date_of_birth, sex, ranking, score=0
-        return une list
+        return  list of parameter for be a Player
         """
         family_name = ""
         if_str = False
@@ -341,3 +352,40 @@ class View:
         else:
             # It is for Windows platform
             _ = os.system('cls')
+
+    @staticmethod
+    def print_match(couples_players, i):
+        """
+        :param i: the number of the round
+        :param couples_players:
+        :return: list resultat
+        """
+        print(f" Round {i}:")
+        x = 0
+        for [player1, player2] in couples_players:
+            x += 1
+            print(f"match {x} opposant {player1['family_name']} {player1['first_name']} "
+                  f"contre {player2['family_name']} {player2['first_name']}")
+
+        results = []
+        x = 0
+        for [player1, player2] in couples_players:
+            x += 1
+            print(f"Resultat du match {x} opposant Joueur 1 {player1['family_name']}"
+                  f" {player1['first_name']} "
+                  f"contre joueur 2 {player2['family_name']} {player2['first_name']} :")
+            print("1) Joueur 1 gagne\n2) Joueur 2 gagne\n3) Match nul")
+            result_match = 0
+            if_number = False
+            while not if_number:
+                result_match = input("Rentrer le résultat :")
+                try:
+                    result_match = int(result_match)
+                    if 0 < result_match <= 3:
+                        if_number = True
+                except ValueError:
+                    print("Veuillez taper un chiffre, soit 1, 2 ou 3")
+            results.append(result_match)
+
+        return results
+

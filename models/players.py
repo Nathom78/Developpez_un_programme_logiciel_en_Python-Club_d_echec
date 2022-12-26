@@ -119,7 +119,7 @@ class PlayersId:
         return text
 
     @classmethod
-    def ids_to_dicts(cls, list_players_id):  # à faire mieux et ménage Players.list_player
+    def ids_to_dicts(cls, list_players_id):
         """ Liste de joueur ID, retourne une liste de Player(dict)"""
         list_player = []
         player = {}
@@ -178,7 +178,6 @@ class PlayersId:
         db = TinyDB(PATH)
         players_table = db.table(NAME_PLAYERS_TABLE)
         return players_table.get(doc_id=player_id)
-
 
 # for i in range(8):
 #    Player.save(Player(f"Lebon{i + 1}", "Paul", "21/06/1969", "M", 15 + i))
