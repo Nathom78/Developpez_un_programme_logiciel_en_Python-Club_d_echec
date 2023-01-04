@@ -374,7 +374,7 @@ class View:
             print(f"Resultat du match {x} opposant Joueur 1 {player1['family_name']}"
                   f" {player1['first_name']} "
                   f"contre joueur 2 {player2['family_name']} {player2['first_name']} :")
-            print("1) Joueur 1 gagne\n2) Joueur 2 gagne\n3) Match nul")
+            print("1) Joueur 1 a gagné\n2) Joueur 2 a gagné\n3) Match nul")
             result_match = 0
             if_number = False
             while not if_number:

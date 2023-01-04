@@ -5,6 +5,8 @@ from controllers.club_manage import ControllerMenuPlayersLists
 from controllers.system_swiss import ControllerSwiss
 from typing import List
 
+from time import strftime
+
 NUMBER_OF_PLAYERS = 8
 
 
@@ -20,10 +22,10 @@ class ControllerTournaments:
         self.view = view
 
         # manage players' club ## type Controller à effacer
-        self.menu:ControllerMenuPlayersLists  = controller_menu
+        self.menu: ControllerMenuPlayersLists = controller_menu
 
         # method calcul ronde  ## type Controller à effacer
-        self.method_calcul_round:ControllerSwiss = method_calcul_round
+        self.method_calcul_round: ControllerSwiss = method_calcul_round
 
     def get_players(self):
         """
@@ -74,11 +76,11 @@ class ControllerTournaments:
 
     def run(self):
         #
-        new_tournament = Tournament
         new_tournament = self.new_tournament_or_load()
         # ajouter un tournoi à la liste des tournaments actif, dans le cas futur
         # plusieurs tournois joué en même temps
         Tournaments.tournaments_actif.append(new_tournament)
+
         # afficher le menu, afin d'ajouter un joueur ou consulter
         self.menu_players_and_lists()
         # Listes des joueurs
@@ -92,13 +94,42 @@ class ControllerTournaments:
             round1 = Round(self.players)
             round1.name = "round1"
             round1.list_matches = self.method_calcul_round.run()
-            match_players = []
-            for match in round1.list_matches:
-                match_players.append(match.match_players_ids_to_players())
+            # Création des matchs
+            match1 = Match(round1.list_matches[0])
+            match2 = Match(round1.list_matches[1])
+            match3 = Match(round1.list_matches[2])
+            match4 = Match(round1.list_matches[3])
 
-            results = self.view.print_match(match_players, i)
+            # Stockage des couples de joueurs de chaque match dans le round
+            # Afin d'afficher les matchs
+            for match in round1.list_matches:  # Peut-être supprimer round couples players
+                round1.couples_players.append(match.match_players_ids_to_players())
+            round1.list_matches_resultat = self.view.print_match(round1.couples_players, i)
+
             # enregistrer résultat du match et fin du round
-            for result in results:  #  zip result et match -> round -> tournament
+            for result, couple in zip(round1.list_matches_resultat, round1.couples_players):
+                # zip result et match -> round ->
+                # save tournament
+                # utiliser les Id players pour modifier le joueur dans la base
+                # ou sinon je n'utilise pas player['score_last_match']
+                # et je stock juste dans le tournament
+
+                if result == 1:
+                    couple[0]['score_last_match'] = 1
+                if result == 2:
+                    couple[1]['score_last_match'] = 1
+                if result == 3:
+                    couple[0]['score_last_match'] = 0.5
+                    couple[1]['score_last_match'] = 0.5
+
+            round1.finish_time = strftime('%H:%M:%S')
+            new_tournament['round'].append(round1)
+            
+
+
+
+
+
 
 
 

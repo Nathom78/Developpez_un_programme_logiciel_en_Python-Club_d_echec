@@ -1,4 +1,5 @@
 from models.tournament import Match
+from models.players import PlayersId
 
 
 class ControllerSwiss:
@@ -8,9 +9,13 @@ class ControllerSwiss:
 
     def __init__(self):
         self.list_match = Match
+        self.players = []
 
-    def run(self):
+    def run(self, player_tournament):
+
         return self.list_match
+
+
 
 
 

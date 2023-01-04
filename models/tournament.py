@@ -53,7 +53,7 @@ class Tournament(dict):
     def tournament_players(self, list_player):
         self['players'] = list_player
 
-    def save(self):
+    def create(self):
         name = self['name']
         db = TinyDB(PATH)
         tournaments_table = db.table(name)  # pour le tournoi regroupant tout
@@ -117,7 +117,7 @@ class Tournaments(list):
         cls.tournaments_actif.append(tournament)
 
     @classmethod
-    def save_all(cls):  # pas bon
+    def save_all(cls):  # pas bon 1) risque de 2 fois le même
         """
         save list of name of tournament
         :return: ok
@@ -167,14 +167,14 @@ class Round(list):
 
     def __init__(self, list_players_id):
         super().__init__()
-        self.list_players_id = list_players_id
+        self.list_players_id: List[PlayersId] = list_players_id
         self.name = ""
         self.starting_date = strftime('%d/%m/%Y')
         self.starting_time = strftime('%H:%M:%S')
         self.finish_time = ""
         self.list_matches_resultat = ()
         self.couples_players = []
-        self.list_matches = []
+        self.list_matches: List[Match] = []
 
     def append(self, object: object):
         """Append a match. """
@@ -208,6 +208,7 @@ class Match:
         player1 = PlayersId.id_to_dict(player1_id)
         player2 = PlayersId.id_to_dict(player2_id)
         return [player1, player2]
+
 
 
 
