@@ -17,6 +17,8 @@ class Player(dict):
         'sex': "M",  # (M ou F)
         'ranking_Elo': 12
         'score:': 0
+        'score_last_match' : 0
+        'tournaments': 'T1',"T3"
         }
     """
 
@@ -39,7 +41,7 @@ class Player(dict):
                f"- date of birth : {self['date_of_birth']}, " \
                f"sex : {self['sex']},\n" \
                f"- ranking : {self['ranking']}, " \
-               f"score : {self['score']},\n"\
+               f"score : {self['score']},\n" \
                f"- tournaments played : {self['tournaments']}.\n"
 
     @staticmethod
@@ -62,7 +64,7 @@ class Player(dict):
         return player
 
     @staticmethod
-    def save(player):
+    def create(player):
         db = TinyDB(PATH)
         players_table = db.table(NAME_PLAYERS_TABLE)
         if not isinstance(player, Player):
@@ -179,8 +181,9 @@ class PlayersId:
         players_table = db.table(NAME_PLAYERS_TABLE)
         return players_table.get(doc_id=player_id)
 
+
 # for i in range(8):
-#    Player.save(Player(f"Lebon{i + 1}", "Paul", "21/06/1969", "M", 15 + i))
+#    Player.create(Player(f"Lebon{i + 1}", "Paul", "21/06/1969", "M", 15 + i))
 
 # adidas = PlayersId()
 # adidas.load_all()

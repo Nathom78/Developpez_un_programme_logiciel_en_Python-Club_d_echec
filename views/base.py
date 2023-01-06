@@ -65,17 +65,18 @@ class View:
         Return : choix dans le menu
         """
         print("1) Enregistrer un nouveau joueur\n2) Liste des joueurs\n"
-              "3) Modifier un joueur\n4) Enregistrer le tournoi\n5) Retour")
+              "3) Modifier un joueur\n4) Enregistrer le tournoi\n5) Charger un tournoi"
+              "actifs\n6) Retour")
         choice = 0
         if_number = False
         while not if_number:
             choice = input(":")
             try:
                 choice = int(choice)
-                if 0 < choice <= 5:  # number max in menu...
+                if 0 < choice <= 6:  # number max in menu...
                     if_number = True
             except ValueError:
-                print("Veuillez taper un nombre entre 1 et 5")
+                print("Veuillez taper un nombre entre 1 et 6")
         return choice
 
     @staticmethod
@@ -299,7 +300,7 @@ class View:
 
         if_number = False
         while not if_number:
-            score = input("Rentrer le score total du tournoi :"
+            score = input("Rentrer le score total dans le tournoi :"
                           f" {player['score']}")
             if score == "":
                 if_number = True
@@ -360,32 +361,32 @@ class View:
         :param couples_players:
         :return: list resultat
         """
-        print(f" Round {i}:")
+        # Affiche le round et les matches à jouer
+        print(f"Ronde {i}: ")
         x = 0
         for [player1, player2] in couples_players:
             x += 1
             print(f"match {x} opposant {player1['family_name']} {player1['first_name']} "
                   f"contre {player2['family_name']} {player2['first_name']}")
 
-        results = []
-        x = 0
-        for [player1, player2] in couples_players:
-            x += 1
-            print(f"Resultat du match {x} opposant Joueur 1 {player1['family_name']}"
-                  f" {player1['first_name']} "
-                  f"contre joueur 2 {player2['family_name']} {player2['first_name']} :")
-            print("1) Joueur 1 a gagné\n2) Joueur 2 a gagné\n3) Match nul")
-            result_match = 0
-            if_number = False
-            while not if_number:
-                result_match = input("Rentrer le résultat :")
-                try:
-                    result_match = int(result_match)
-                    if 0 < result_match <= 3:
-                        if_number = True
-                except ValueError:
-                    print("Veuillez taper un chiffre, soit 1, 2 ou 3")
-            results.append(result_match)
-
-        return results
+    @staticmethod
+    def input_match_result(couple_players, number_match, number_round):
+        # Attend les résultats des matchs
+        print(f" Rentrer les résultats de la ronde {number_round}: ")
+        [player1, player2] = couple_players
+        print(f"Resultat du match {number_match} : \nopposant le joueur 1 "
+              f"{player1['family_name']} {player1['first_name']}\n"
+              f"contre le joueur 2 {player2['family_name']} {player2['first_name']} :")
+        print("1) Joueur 1 a gagné\n2) Joueur 2 a gagné\n3) Match nul\n4) Menu")
+        result_match = 0
+        if_number = False
+        while not if_number:
+            result_match = input("Rentrer le résultat :")
+            try:
+                result_match = int(result_match)
+                if 0 < result_match <= 4:
+                    if_number = True
+            except ValueError:
+                print("Veuillez taper un chiffre, soit 1, 2, 3 ou 4")
+        return result_match
 

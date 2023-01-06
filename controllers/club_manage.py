@@ -18,7 +18,7 @@ class ControllerMenuPlayersLists:
         attribut_player = self.view.menu_manage_club_case_1()
         player = Player(*attribut_player)
         # enregistrer dans la base
-        player_id = Player.save(player)
+        player_id = Player.create(player)
 
         PlayersId.players_IDs.append(player_id)
         return
@@ -60,12 +60,12 @@ class ControllerMenuPlayersLists:
             text = Tournaments.print_all()
             self.view.menu_manage_club_case_2_print(text)
 
-        # ●	4) Liste de tous les tours d'un tournoi.
+        # ●	4) Liste de tous les rounds d'un tournoi.
         elif choice == 4:
             Tournaments.load_all()
             name_tournament = self.view.menu_manage_club_case_2_2_choice(
                 Tournaments.list_tournament)
-            tournament = Tournament.load(name_tournament)
+            tournament: Tournament = Tournament.load(name_tournament)
             text = tournament['rounds']
             self.view.menu_manage_club_case_2_print(text)
         # ●	5) Liste de tous les matchs d'un tournoi.
@@ -73,9 +73,9 @@ class ControllerMenuPlayersLists:
             Tournaments.load_all()
         name_tournament = self.view.menu_manage_club_case_2_2_choice(
             Tournaments.list_tournament)
-        tournament = Tournament.load(name_tournament)
+        tournament: Tournament = Tournament.load(name_tournament)
         for ronde in tournament['rounds']:
-            for match in ronde.list_matches_resultat:
+            for match in ronde.list_matches_result:
                 match1_info = match[0]
                 match2_info = match[1]
                 player1_id = match1_info[0]
@@ -91,7 +91,8 @@ class ControllerMenuPlayersLists:
                 else:
                     winner = "match nul"
                 text = f"Match {player1['family_name']} {player1['first_name']} " \
-                       f"contre {player2['family_name']} {player2['first_name']}\n {winner}"
+                       f"contre {player2['family_name']} {player2['first_name']}\n " \
+                       f"Le gagnant est : {winner}"
                 self.view.menu_manage_club_case_2_print(text)
 
         return
@@ -125,7 +126,11 @@ class ControllerMenuPlayersLists:
         return
 
     @staticmethod
-    def case_5():  # 5) retour
+    def case_5():  # 5) Charger un tournoi
+        return 'quit'
+
+    @staticmethod
+    def case_6():  # 6) retour
         return 'quit'
 
     def choice(self, cases):
