@@ -2,16 +2,17 @@ from models.players import Player, PlayersId
 from models.tournament import Tournaments, Tournament
 
 
-class ControllerMenuPlayersLists:
+class ControllerMenu:
     """
     Menu for report and manage players
     """
 
-    def __init__(self, view):
+    def __init__(self, view, controller_tournament):
         """
         :param view: views.base.py
         """
         self.view = view
+        self.controller_tournament = controller_tournament
 
     def case_1(self):  # 1) Enregistrer un nouveau joueur
         # demander à la view infos
@@ -19,7 +20,6 @@ class ControllerMenuPlayersLists:
         player = Player(*attribut_player)
         # enregistrer dans la base
         player_id = Player.create(player)
-
         PlayersId.players_IDs.append(player_id)
         return
 
@@ -67,34 +67,30 @@ class ControllerMenuPlayersLists:
                 Tournaments.list_tournament)
             tournament: Tournament = Tournament.load(name_tournament)
             text = tournament['rounds']
+            # faire boucle for
             self.view.menu_manage_club_case_2_print(text)
+
         # ●	5) Liste de tous les matchs d'un tournoi.
         elif choice == 5:
             Tournaments.load_all()
-        name_tournament = self.view.menu_manage_club_case_2_2_choice(
-            Tournaments.list_tournament)
-        tournament: Tournament = Tournament.load(name_tournament)
-        for ronde in tournament['rounds']:
-            for match in ronde.list_matches_result:
-                match1_info = match[0]
-                match2_info = match[1]
-                player1_id = match1_info[0]
-                player1_score = match1_info[1]
-                player2_id = match2_info[0]
-                player2_score = match2_info[1]
-                player1 = PlayersId.id_to_dict(player1_id)
-                player2 = PlayersId.id_to_dict(player2_id)
-                if player1_score > player2_score:
-                    winner = f"{player1['family_name']} {player1['first_name']}"
-                elif player1_score < player2_score:
-                    winner = f"{player1['family_name']} {player1['first_name']}"
-                else:
-                    winner = "match nul"
-                text = f"Match {player1['family_name']} {player1['first_name']} " \
-                       f"contre {player2['family_name']} {player2['first_name']}\n " \
-                       f"Le gagnant est : {winner}"
-                self.view.menu_manage_club_case_2_print(text)
-
+            name_tournament = self.view.menu_manage_club_case_2_2_choice(
+                Tournaments.list_tournament)
+            tournament: Tournament = Tournament.load(name_tournament)
+            for ronde in tournament['rounds']:
+                for match in ronde.list_matches:
+                    ([player1_id, player1_score], [player2_id, player2_score]) = match.result_match
+                    player1 = PlayersId.id_to_dict(player1_id)
+                    player2 = PlayersId.id_to_dict(player2_id)
+                    if player1_score > player2_score:
+                        winner = f"{player1['family_name']} {player1['first_name']}"
+                    elif player1_score < player2_score:
+                        winner = f"{player1['family_name']} {player1['first_name']}"
+                    else:
+                        winner = "match nul"
+                    text = f"Match {player1['family_name']} {player1['first_name']} " \
+                           f"contre {player2['family_name']} {player2['first_name']}\n " \
+                           f"Le gagnant est : {winner}"
+                    self.view.menu_manage_club_case_2_print(text)
         return
 
     def case_3(self):  # 3) Modifier un joueur
@@ -125,9 +121,9 @@ class ControllerMenuPlayersLists:
             raise ValueError("Erreur Tournament not save ")
         return
 
-    @staticmethod
-    def case_5():  # 5) Charger un tournoi
-        return 'quit'
+    def case_5(self):  # 5) Charger un tournoi
+        self.controller_tournament.load_tournament()
+        return
 
     @staticmethod
     def case_6():  # 6) retour
@@ -145,3 +141,8 @@ class ControllerMenuPlayersLists:
             menu = self.choice(choice)
         return
 
+
+# from views.base import View
+#
+# new = ControllerMenuPlayersLists(View)
+# new.run()

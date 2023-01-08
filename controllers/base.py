@@ -1,11 +1,12 @@
-from views.base import View
 from models.players import Player, PlayersId
-from models.tournament import Tournaments, Tournament, Round, Match
-from controllers.club_manage import ControllerMenuPlayersLists
-from controllers.system_swiss import ControllerSwiss
+from models.tournament import Tournaments, Tournament, Round, RoundSerialized, Match
 from typing import List
-
 from time import strftime
+
+from controllers.club_manage import ControllerMenu
+from controllers.system_swiss import ControllerSwiss
+from views.base import View
+
 
 NUMBER_OF_PLAYERS = 8
 
@@ -18,11 +19,11 @@ class ControllerTournaments:
         self.players: List[PlayersId] = []
         self.tournaments = Tournaments
 
-        # views
-        self.view = view
+        # views ## type View à effacer
+        self.view: View = view
 
         # manage players' club ## type Controller à effacer
-        self.menu: ControllerMenuPlayersLists = controller_menu
+        self.menu: ControllerMenu = controller_menu
 
         # method calcul des rondes du tournoi ## type Controller à effacer
         self.method_calcul_round: ControllerSwiss = method_calcul_round
@@ -74,48 +75,72 @@ class ControllerTournaments:
             self.players = tournament['players']
         return tournament
 
+    def load_tournament(self):
+        Tournaments.load_all()
+        name_tournament = self.view.menu_manage_club_case_2_2_choice(
+            Tournaments.list_tournament)
+        tournament = Tournament.load(name_tournament)
+
+        self.tournaments.tournaments_actif.append(tournament)
+        self.run()
+
     def run(self):
         #
         new_tournament = self.new_tournament_or_load()
         # ajouter un tournoi à la liste des tournaments actif, dans le cas futur
-        # plusieurs tournois joué en même temps et stock dans la DB le nom
+        # où plusieurs tournois seront joués en même temps et stock dans la DB le nom
         Tournaments.add_db_tournament(new_tournament)
 
-        # afficher le menu, afin d'ajouter un joueur ou consulter
+        # afficher le menu, afin d'ajouter un joueur au club ou autre
         self.menu_players_and_lists()
         # Listes des joueurs
         if len(self.players) < 8:
             self.get_players()
         new_tournament.tournament_players(self.players)
+        # ajouter le nom du tournoi à la liste des tournois joué par le joueur
+        # et initialiser son score si le joueur n'était pas dans le tournoi
+        list_players = PlayersId.ids_to_dicts(self.players)
+        for player, player_id in zip(list_players, self.players):
+            if new_tournament['name'] not in player['tournaments']:
+                player['tournaments'].append(new_tournament['name'])
+                player['score'] = 0
+                player.modify(player, player_id)
 
         # round 1:
         round1: Round
+        round1_couples_players = []
         i = 1  # numéro du round
 
-        # création du round s'il n'existe pas
+        # création du round s'il n'existe pas dans le tournoi
         if not isinstance(new_tournament['rounds'][i - 1], Round):
             round1 = Round()
             round1.name = "round1"
             # Listes des matchs
             round1.list_matches = self.method_calcul_round.run(self.players)
-
             # Stockage des couples de joueurs de chaque match dans le round
             for match in round1.list_matches:  # Peut-être supprimer round couples players
-                round1.couples_players.append(match.match_players_ids_to_players())
+                round1_couples_players.append(match.match_players_ids_to_players())
             # Afin d'afficher les matchs
-            self.view.print_match(round1.couples_players, i)
-            # Stockage du round dans le tournoi et sauvegarde du tournoi
-            new_tournament['rounds'].append(round1)
+            self.view.print_match(round1_couples_players, i)
+            # Stockage du round dans le tournoi et sauvegarde (création) du tournoi
+            round1_serialized = RoundSerialized().ready_to_save(round1)
+            new_tournament['rounds'].append(round1_serialized)
             new_tournament.save()
 
+        # Proposition du menu
+        choice = 0
+        while not choice == 1:
+            choice = self.view.ask_resultat_or_menu()
+
+        # remplissage du round si nécessaire
         round1 = new_tournament['rounds'][i - 1]
         while round1.finish_time != "":
             m = 0
-            for match, couple in zip(round1.list_matches, round1.couples_players):
+            for match, couple in zip(round1.list_matches, round1_couples_players):
                 if round1.list_results[m] is None:
                     result = self.view.input_match_result(couple, m, i)
                     round1.list_results.append(result)
-                    # enregistrer résultat du match et fin du round
+                    # enregistrer le résultat du match
                     if result == 1:
                         couple[0]['score_last_match'] = 1
                         couple[1]['score_last_match'] = 0
@@ -127,16 +152,21 @@ class ControllerTournaments:
                         couple[1]['score_last_match'] = 0.5
                     if result == 4:
                         self.menu_players_and_lists()
+                    # création du tuple resultat du match
+                    match.match_result()
                     # mise à jour dans db des joueurs
                     for player, player_id in zip(couple, match.couple_players_id):
-
                         player['score'] += player['score_last_match']
                         Player.modify(player, player_id)
-                    # création du tuple resultat du match
-                    round1.list_matches_result.append(match.match_result)
-
+            # Cloture du round
             round1.finish_time = strftime('%H:%M:%S')
             round1.finish_date = strftime('%d/%m/%Y')
-
-            new_tournament['rounds'][i - 1] = round1
             # save tournament
+            round1_serialized = RoundSerialized().ready_to_save(round1)
+            new_tournament['rounds'][i - 1] = round1_serialized
+            new_tournament.save()
+            text = "Tournoi sauvegardé"
+            self.view.menu_manage_club_case_2_print(text)
+
+
+

@@ -123,7 +123,7 @@ class PlayersId:
     @classmethod
     def ids_to_dicts(cls, list_players_id):
         """ Liste de joueur ID, retourne une liste de Player(dict)"""
-        list_player = []
+        list_players = []
         player = {}
         for player_id in list_players_id:
             dict_player = cls.id_to_dict(player_id)
@@ -132,8 +132,8 @@ class PlayersId:
             except ValueError:
                 print(f"Base de donnée incorrect pour le joueur {player_id}")
             finally:
-                list_player.append(player)
-        return list_player
+                list_players.append(player)
+        return list_players
 
     @classmethod
     def print_list_club(cls, sort=0):

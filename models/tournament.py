@@ -43,12 +43,12 @@ class Tournament(dict):
         self['description'] = description
 
     def __str__(self):
-        return f"\nLe tournoi {self['name']} de {self['place']} commencé le " \
+        return f"Le tournoi {self['name']} du lieu {self['place']} commencé le " \
                f"{self['date_creation']}\n" \
-               f"avec {self['number_total_round']} ronde, le type du jeux est " \
-               f" {self['type_game_time']}\n" \
+               f"a {self['number_total_round']} rondes, le type du jeux est " \
+               f"{self['type_game_time']},\n" \
                f"liste des rounds : {self['rounds']}\n" \
-               f"liste des joueurs : {self['players']}"
+               f"liste des joueurs : {self['players']}\n"
 
     def tournament_players(self, list_player_id):
         self['players'] = list_player_id
@@ -74,7 +74,7 @@ class Tournament(dict):
             tournament['players'] = tournament_temp['players']
             tournament['rounds'] = tournament_temp['rounds']
         except(KeyError, TypeError,):
-            print(f"Base de donnée incorrect pour le joueur {tournament_temp}")
+            print(f"Base de donnée incorrect pour le tournoi {tournament_temp}")
         finally:
             if not isinstance(tournament, Tournament):
                 raise ValueError("tournoi mal défini!")
@@ -143,7 +143,7 @@ class Tournaments(list):
         cls.list_tournament = []
         list_temp = tournaments_table.all()
         for document in list_temp:
-            if document in list_tables:
+            if document['name'] in list_tables:
                 cls.list_tournament.append(document['name'])
             else:
                 print(ValueError(f"Tournament {document} incorrectly saving"))
@@ -155,7 +155,7 @@ class Tournaments(list):
         """
         text = ""
         for x in range(len(cls.list_tournament)):
-            text += f"Tournoi {cls.list_tournament[x]}:\n{Tournament.load(cls.list_tournament[x])}"
+            text += f"Tournoi {cls.list_tournament[x]} :\n{Tournament.load(cls.list_tournament[x])}"
         return text
 
 
@@ -175,29 +175,64 @@ class Round:
         self.starting_time = strftime('%H:%M:%S')
         self.finish_time = ""
         self.finish_date = ""
-        self.list_matches_result: List[Match.match_result] = []
         self.list_results = []
-        self.couples_players = []
         self.list_matches: List[Match] = []
 
     def __str__(self):
         return f"\nLa ronde {self.name} commencé le " \
                f"{self.starting_date} à {self.starting_time}\n" \
-               f"\nList des matchs :\n" \
+               f"\nListe des matchs :\n\n" \
                f"{self.list_matches[0]}\n" \
                f"{self.list_matches[1]}\n" \
                f"{self.list_matches[2]}\n" \
                f"{self.list_matches[3]}\n" \
-               f"avec les couples de joueurs :\n" \
-               f"Joueur\n{Player.correspond_player(self.couples_players[0][0])}\n" \
-               f"Contre le joueur\n{Player.correspond_player(self.couples_players[0][1])}\n" \
-               f"Joueur\n{Player.correspond_player(self.couples_players[1][0])}\n" \
-               f"Contre le joueur\n{Player.correspond_player(self.couples_players[1][1])}\n" \
-               f"Joueur\n{Player.correspond_player(self.couples_players[2][0])}\n" \
-               f"Contre le joueur\n{Player.correspond_player(self.couples_players[2][1])}\n" \
-               f"Joueur\n{Player.correspond_player(self.couples_players[3][0])}\n" \
-               f"Contre le joueur\n{Player.correspond_player(self.couples_players[3][1])}\n" \
                f"Finis le {self.finish_date} à {self.finish_time}\n"
+
+    @staticmethod
+    def instantiate(serialized_round):
+        round_temp = Round
+        try:
+            round_temp.name = serialized_round['name']
+            round_temp.starting_date = serialized_round['starting_date']
+            round_temp.starting_time = serialized_round['starting_time']
+            round_temp.finish_time = serialized_round['finish_time']
+            round_temp.finish_date = serialized_round['finish_date']
+            round_temp.list_results = serialized_round['list_results']
+            round_temp.list_matches = serialized_round['list_matches']
+        except(KeyError, TypeError,):
+            print(f"Base de donnée incorrect pour le round {serialized_round}")
+        finally:
+            if not isinstance(round_temp, Round):
+                raise ValueError("tournoi mal défini!")
+        return round_temp
+
+
+class RoundSerialized(dict):
+
+    def __init__(self):
+        super().__init__()
+        self['name'] = ""
+        self['starting_date'] = ""
+        self['starting_time'] = ""
+        self['finish_time'] = ""
+        self['finish_date'] = ""
+        self['list_results'] = []
+        self['list_matches']: List[Match] = []
+
+    def ready_to_save(self, round_to):
+        """
+
+        :type round_to: Round
+        """
+        self['name'] = round_to.name
+        self['starting_date'] = round_to.starting_date
+        self['starting_time'] = round_to.starting_time
+        self['finish_time'] = round_to.finish_time
+        self['finish_date'] = round_to.finish_date
+        self['list_results'] = round_to.list_results
+        for match_to in round_to.list_matches:
+            self['list_matches'].append(MatchSerialized(match_to))
+        return self
 
 
 class Match:
@@ -231,7 +266,6 @@ class Match:
         player1_result = player1['score_last_match']
         player2_result = player2['score_last_match']
         self.result_match = ([player1_id, player1_result], [player2_id, player2_result])
-        return self.result_match
 
     def match_players_ids_to_players(self):
         player1_id = self.couple_players_id[0]
@@ -241,25 +275,38 @@ class Match:
         return [player1, player2]
 
 
-t1 = Tournament('T1', 'Maison', 'bullet')
-t2 = Tournament('T2', 'Home', 'bullet')
-Tournaments.add_db_tournament(t1)
-Tournaments.add_db_tournament(t2)
-t1.tournament_players([1, 2, 3, 4, 5, 6, 7, 8])
-round1 = Round()
-round1.name = 'Round1'
-match1 = Match([1, 2])
-match2 = Match([3, 4])
-match3 = Match([5, 6])
-match4 = Match([7, 8])
-round1.list_matches = [match1, match2, match3, match4]
-for match in round1.list_matches:  # Peut-être supprimer round couples players
-    round1.couples_players.append(match.match_players_ids_to_players())
-    round1.list_matches_result.append(match.match_result())
-round1.list_results = [1, 1, 3, 2]
-round1.finish_time = strftime('%H:%M:%S')
-round1.finish_date = strftime('%d/%m/%Y')
-print(round1)
-t1['rounds'].append(round1)
-print(t1['rounds'])
-t1.save()
+class MatchSerialized(dict):
+
+    def __init__(self, match_to):
+        """
+
+        :type match_to: Match
+        """
+        super().__init__()
+        self['couple_players_id'] = match_to.couple_players_id
+        self['result_match'] = match_to.result_match
+
+
+# t1 = Tournament('T1', 'Maison', 'bullet')
+# t2 = Tournament('T2', 'Home', 'bullet')
+# Tournaments.add_db_tournament(t1)
+# Tournaments.add_db_tournament(t2)
+# t1.tournament_players([1, 2, 3, 4, 5, 6, 7, 8])
+# round1 = Round()
+# round1.name = 'Round1'
+# match1 = Match([1, 2])
+# match2 = Match([3, 4])
+# match3 = Match([5, 6])
+# match4 = Match([7, 8])
+# round1.list_matches = [match1, match2, match3, match4]
+# for match in round1.list_matches:  # Peut-être supprimer round couples players
+#     match.match_result()
+# round1.list_results = [1, 1, 3, 2]
+# round1.finish_time = strftime('%H:%M:%S')
+# round1.finish_date = strftime('%d/%m/%Y')
+# print(round1)
+# round1_serialized = RoundSerialized().ready_to_save(round1)
+#
+# t1['rounds'].append(round1_serialized)
+# print(t1['rounds'])
+# t1.save()

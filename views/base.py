@@ -27,6 +27,25 @@ class View:
         return choice
 
     @staticmethod
+    def ask_resultat_or_menu():
+        """
+
+        :return: choice
+        """
+        print("Voulez-vous rentrer un résultat (1) ou voir le menu (2)")
+        choice = 0
+        if_number = False
+        while not if_number:
+            choice = input(": ")
+            try:
+                choice = int(choice)
+                if 0 < choice <= 2:  # number max in menu...
+                    if_number = True
+            except ValueError:
+                print("Veuillez taper un nombre entre 1 et 2")
+        return choice
+
+    @staticmethod
     def prompt_for_tournament():
         """Prompt  for information to create a tournament"""
         name = input("Donner un nom au tournoi :")
@@ -48,7 +67,7 @@ class View:
         if_number = False
         number_in_list = 0
         while not if_number:
-            number_in_list = input(":")
+            number_in_list = input(": ")
             try:
                 number_in_list = int(number_in_list)
                 if 0 <= number_in_list:
@@ -64,13 +83,13 @@ class View:
         """
         Return : choix dans le menu
         """
-        print("1) Enregistrer un nouveau joueur\n2) Liste des joueurs\n"
+        print("\n1) Enregistrer un nouveau joueur\n2) Listes\n"
               "3) Modifier un joueur\n4) Enregistrer le tournoi\n5) Charger un tournoi"
-              "actifs\n6) Retour")
+              " actifs\n6) Retour")
         choice = 0
         if_number = False
         while not if_number:
-            choice = input(":")
+            choice = input("Votre choix : ")
             try:
                 choice = int(choice)
                 if 0 < choice <= 6:  # number max in menu...
@@ -106,7 +125,7 @@ class View:
         date_of_birth = ""
         if_date = False
         while not if_date:
-            date_of_birth = input("tapez la date de naissance du joueur (dd/mm/yyyy) :")
+            date_of_birth = input("tapez la date de naissance du joueur (dd/mm/yyyy) : ")
             try:
                 datetime.datetime.strptime(date_of_birth, '%d/%m/%Y')
                 if_date = True
@@ -116,7 +135,7 @@ class View:
         sex = ""
         if_sex = False
         while not if_sex:
-            sex = input("tapez le genre du joueur (M ou F) :")
+            sex = input("tapez le genre du joueur (M ou F) : ")
             if sex == ("M" or "F" or "m" or "f"):
                 if_sex = True
             else:
@@ -125,7 +144,7 @@ class View:
         ranking = 0
         if_number = False
         while not if_number:
-            ranking = input("taper le score (rang Elo) :")
+            ranking = input("taper le score (rang Elo) : ")
             try:
                 ranking = int(ranking)
                 if_number = True
@@ -135,7 +154,7 @@ class View:
         score = 0
         if_number = False
         while not if_number:
-            score = input("Rentrer le score si different de 0")
+            score = input("Rentrer le score si different de 0 : ")
             if score == "":
                 score = 0
             try:
@@ -150,7 +169,7 @@ class View:
     @staticmethod
     def menu_manage_club_case_2():
         """ Prompt for List """
-        print("1) Liste de tous les acteurs\n "
+        print("1) Liste de tous les acteurs\n"
               "2) Liste de tous les joueurs d'un tournoi\n"
               "3) Liste de tous les tournois.\n"
               "4) Liste de tous les tours d'un tournoi.\n"
@@ -159,7 +178,7 @@ class View:
         choice = 0
         if_number = False
         while not if_number:
-            choice = input()
+            choice = input("Votre choix : ")
             try:
                 choice = int(choice)
                 if 0 <= choice <= 5:  # number max in menu...
@@ -176,7 +195,7 @@ class View:
         sort = 0
         if_number = False
         while not if_number:
-            sort = input(":")
+            sort = input(": ")
             try:
                 sort = int(sort)
                 if 0 < sort <= 2:  # number max in menu...
@@ -205,7 +224,7 @@ class View:
         choice = 0
         if_number = False
         while not if_number:
-            choice = input("Entrer le numéro du tournoi :")
+            choice = input("Entrer le numéro du tournoi : ")
             try:
                 choice = int(choice)
                 if 0 < choice <= i:
@@ -221,7 +240,7 @@ class View:
         choice = 0
         if_number = False
         while not if_number:
-            choice = input("Entrer le numéro du joueur à modifier :")
+            choice = input("Entrer le numéro du joueur à modifier : ")
             try:
                 choice = int(choice)
                 if 0 < choice <= i:
@@ -238,11 +257,11 @@ class View:
         :return: player modify
         """
 
-        print('Entrer une nouvelle valeur ou juste taper la touche "Entrée" :')
+        print('Entrer une nouvelle valeur ou juste taper la touche "Entrée" : ')
         player_modify = player
         if_str = False
         while not if_str:
-            family_name = input(f"- nom de famille du joueur : {player['family_name']} :")
+            family_name = input(f"- nom de famille du joueur : {player['family_name']} : ")
             if family_name == "":
                 if_str = True
             elif family_name.isalpha():
@@ -253,7 +272,7 @@ class View:
 
         if_str = False
         while not if_str:
-            first_name = input(f"tapez le prénom du joueur : {player['first_name']} :")
+            first_name = input(f"tapez le prénom du joueur : {player['first_name']} : ")
             if first_name == "":
                 if_str = True
             elif first_name.isalpha():
@@ -276,7 +295,7 @@ class View:
 
         if_sex = False
         while not if_sex:
-            sex = input(f"tapez le genre du joueur (M ou F) :{player['sex']} :")
+            sex = input(f"tapez le genre du joueur (M ou F) :{player['sex']} : ")
             if sex == ("M" or "F" or "m" or "f"):
                 player_modify['sex'] = sex
                 if_sex = True
@@ -287,7 +306,7 @@ class View:
 
         if_number = False
         while not if_number:
-            ranking = input(f"taper le score (rang Elo) : {player['ranking']} :")
+            ranking = input(f"taper le score (rang Elo) : {player['ranking']} : ")
             try:
                 if ranking == '':
                     if_number = True
@@ -300,7 +319,7 @@ class View:
 
         if_number = False
         while not if_number:
-            score = input("Rentrer le score total dans le tournoi :"
+            score = input("Rentrer le score total dans le tournoi : "
                           f" {player['score']}")
             if score == "":
                 if_number = True
@@ -331,7 +350,7 @@ class View:
         choice = 0
         if_number = False
         while not if_number:
-            choice = input("Entrer le numéro du tournoi à sauvegarder :")
+            choice = input("Entrer le numéro du tournoi à sauvegarder : ")
             try:
                 choice = int(choice)
                 if 0 < choice <= i:
@@ -376,12 +395,12 @@ class View:
         [player1, player2] = couple_players
         print(f"Resultat du match {number_match} : \nopposant le joueur 1 "
               f"{player1['family_name']} {player1['first_name']}\n"
-              f"contre le joueur 2 {player2['family_name']} {player2['first_name']} :")
+              f"contre le joueur 2 {player2['family_name']} {player2['first_name']} : ")
         print("1) Joueur 1 a gagné\n2) Joueur 2 a gagné\n3) Match nul\n4) Menu")
         result_match = 0
         if_number = False
         while not if_number:
-            result_match = input("Rentrer le résultat :")
+            result_match = input("Rentrer le résultat : ")
             try:
                 result_match = int(result_match)
                 if 0 < result_match <= 4:

@@ -1,7 +1,7 @@
 """main"""
 
 from controllers.base import ControllerTournaments
-from controllers.club_manage import ControllerMenuPlayersLists
+from controllers.club_manage import ControllerMenu
 from controllers.system_swiss import ControllerSwiss
 
 from views.base import View
@@ -9,11 +9,10 @@ from views.base import View
 
 def main():
     view = View
-    menu = ControllerMenuPlayersLists(view)
+    menu = ControllerMenu(view, ControllerTournaments)
     method_calcul_round = ControllerSwiss
 
-    game = ControllerTournaments(view, menu, method_calcul_round)
-    game.run()
+    ControllerTournaments(view, menu, method_calcul_round).run()
 
 
 if __name__ == "__main__":
