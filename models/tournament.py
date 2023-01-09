@@ -3,7 +3,7 @@ from time import strftime
 from tinydb import TinyDB, where
 from models.players import PlayersId, Player
 
-PATH = '../database/tournaments.json'
+PATH = 'database/tournaments.json'
 NAME_PLAYERS_TABLE = 'players'
 NAME_TOURNAMENTS_TABLE = 'Tournaments'
 
@@ -112,7 +112,7 @@ class Tournaments(list):
         """ Add name of tournament in table tournaments
             And become active"""
         db = TinyDB(PATH)
-        tournaments_table = db.table(NAME_TOURNAMENTS_TABLE)  # pour les tournois regroupant tout
+        tournaments_table = db.table(NAME_TOURNAMENTS_TABLE)
 
         tournaments_table.upsert({'name': tournament['name']},
                                  where('name') == tournament['name'])
@@ -159,7 +159,7 @@ class Tournaments(list):
         return text
 
 
-class Round:
+class Round(dict):
     """
     Actuellement, nous appelons nos tours "Round 1", "Round 2", etc.
     Elle doit également contenir un champ Date et heure de début
@@ -170,23 +170,24 @@ class Round:
     """
 
     def __init__(self):
-        self.name = ""
-        self.starting_date = strftime('%d/%m/%Y')
-        self.starting_time = strftime('%H:%M:%S')
-        self.finish_time = ""
-        self.finish_date = ""
-        self.list_results = []
-        self.list_matches: List[Match] = []
+        super().__init__()
+        self['name'] = ""
+        self['starting_date'] = strftime('%d/%m/%Y')
+        self['starting_time'] = strftime('%H:%M:%S')
+        self['finish_time'] = ""
+        self['finish_date'] = ""
+        self['list_results'] = []
+        self['list_matches']: List[Match] = []
 
     def __str__(self):
-        return f"\nLa ronde {self.name} commencé le " \
-               f"{self.starting_date} à {self.starting_time}\n" \
+        return f"\nLa ronde {self['name']} commencé le " \
+               f"{self['starting_date']} à {self['starting_time']}\n" \
                f"\nListe des matchs :\n\n" \
-               f"{self.list_matches[0]}\n" \
-               f"{self.list_matches[1]}\n" \
-               f"{self.list_matches[2]}\n" \
-               f"{self.list_matches[3]}\n" \
-               f"Finis le {self.finish_date} à {self.finish_time}\n"
+               f"{self['list_matches'][0]}\n" \
+               f"{self['list_matches'][1]}\n" \
+               f"{self['list_matches'][2]}\n" \
+               f"{self['list_matches'][3]}\n" \
+               f"Finis le {self['finish_date']} à {self['finish_time']}\n"
 
     @staticmethod
     def instantiate(serialized_round):
@@ -235,7 +236,7 @@ class RoundSerialized(dict):
         return self
 
 
-class Match:
+class Match(dict):
     """
     Création d'un tuple contenant deux listes, chacune contenant deux éléments :
     une référence à une instance de joueur et un score
@@ -245,12 +246,13 @@ class Match:
         """
         :param couple_players_id: LIST de 2 id
         """
-        self.couple_players_id = couple_players_id
-        self.result_match: Tuple = ()
+        super().__init__()
+        self['couple_players_id'] = couple_players_id
+        self['result_match']: Tuple = ()
 
     def __str__(self):
         [player1, player2] = self.match_players_ids_to_players()
-        ([_, player1_result], [_, player2_result]) = self.result_match
+        ([_, player1_result], [_, player2_result]) = self['result_match']
         return f"Match {player1['family_name']} {player1['first_name']} " \
                f"contre {player2['family_name']} {player2['first_name']}\n" \
                f"le resultat est :\n" \
@@ -261,15 +263,15 @@ class Match:
 
     def match_result(self):
         [player1, player2] = self.match_players_ids_to_players()
-        player1_id = self.couple_players_id[0]
-        player2_id = self.couple_players_id[1]
+        player1_id = self['couple_players_id'][0]
+        player2_id = self['couple_players_id'][1]
         player1_result = player1['score_last_match']
         player2_result = player2['score_last_match']
-        self.result_match = ([player1_id, player1_result], [player2_id, player2_result])
+        self['result_match'] = ([player1_id, player1_result], [player2_id, player2_result])
 
     def match_players_ids_to_players(self):
-        player1_id = self.couple_players_id[0]
-        player2_id = self.couple_players_id[1]
+        player1_id = self['couple_players_id'][0]
+        player2_id = self['couple_players_id'][1]
         player1 = PlayersId.id_to_dict(player1_id)
         player2 = PlayersId.id_to_dict(player2_id)
         return [player1, player2]

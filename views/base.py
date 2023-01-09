@@ -17,7 +17,7 @@ class View:
         choice = 0
         if_number = False
         while not if_number:
-            choice = input(":")
+            choice = input(": ")
             try:
                 choice = int(choice)
                 if 0 < choice <= 2:  # number max in menu...
@@ -85,7 +85,7 @@ class View:
         """
         print("\n1) Enregistrer un nouveau joueur\n2) Listes\n"
               "3) Modifier un joueur\n4) Enregistrer le tournoi\n5) Charger un tournoi"
-              " actifs\n6) Retour")
+              "\n6) Retour")
         choice = 0
         if_number = False
         while not if_number:
@@ -220,7 +220,7 @@ class View:
         i = 0
         for tournament in tournaments:
             i += 1
-            print(f"{i}) {tournament}\n")
+            print(f"{i}) {tournament}")
         choice = 0
         if_number = False
         while not if_number:

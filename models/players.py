@@ -3,7 +3,7 @@ from typing import List
 from tinydb import TinyDB
 
 #  Path to database Tiny
-PATH = f'../database/tournaments.json'
+PATH = 'database/tournaments.json'
 NAME_PLAYERS_TABLE = 'players'
 
 
@@ -85,7 +85,7 @@ class Player(dict):
             if isinstance(player_modify, Player):
                 db = TinyDB(PATH)
                 players_table = db.table(NAME_PLAYERS_TABLE)
-                doc_id_return = players_table.update(player_modify, doc_ids=player_id)
+                doc_id_return = players_table.update(player_modify, doc_ids=[player_id])
                 if doc_id_return == player_id:
                     return "ok"
         except ValueError as error:
