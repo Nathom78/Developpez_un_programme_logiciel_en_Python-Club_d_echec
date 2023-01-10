@@ -7,12 +7,13 @@ class ControllerMenu:
     Menu for report and manage players
     """
 
-    def __init__(self, view, controller_tournament):
+    load = 0
+
+    def __init__(self, view):
         """
         :param view: views.base.py
         """
         self.view = view
-        self.controller_tournament = controller_tournament
 
     def case_1(self):  # 1) Enregistrer un nouveau joueur
         # demander à la view infos
@@ -44,6 +45,8 @@ class ControllerMenu:
             Tournaments.load_all()
             name_tournament = self.view.menu_manage_club_case_2_2_choice(
                 Tournaments.list_tournament)
+            if name_tournament == 0:
+                return
             tournament = Tournament.load(name_tournament)
             sort = self.view.menu_manage_club_case_2_a()
             text = ""
@@ -65,9 +68,12 @@ class ControllerMenu:
             Tournaments.load_all()
             name_tournament = self.view.menu_manage_club_case_2_2_choice(
                 Tournaments.list_tournament)
+            if name_tournament == 0:
+                return
             tournament: Tournament = Tournament.load(name_tournament)
-            text = tournament['rounds']
-            # faire boucle for
+            text = ""
+            for ronde in tournament['rounds']:
+                text += f"{ronde}\n"
             self.view.menu_manage_club_case_2_print(text)
 
         # ●	5) Liste de tous les matchs d'un tournoi.
@@ -75,10 +81,13 @@ class ControllerMenu:
             Tournaments.load_all()
             name_tournament = self.view.menu_manage_club_case_2_2_choice(
                 Tournaments.list_tournament)
+            if name_tournament == 0:
+                return
             tournament: Tournament = Tournament.load(name_tournament)
             for ronde in tournament['rounds']:
-                for match in ronde.list_matches:
-                    ([player1_id, player1_score], [player2_id, player2_score]) = match.result_match
+                for match in ronde['list_matches']:
+                    ([player1_id, player1_score], [player2_id, player2_score]) = \
+                        match['result_match']
                     player1 = PlayersId.id_to_dict(player1_id)
                     player2 = PlayersId.id_to_dict(player2_id)
                     if player1_score > player2_score:
@@ -111,10 +120,11 @@ class ControllerMenu:
         finally:
             self.view.menu_manage_club_case_3_3(text)
 
-    def case_4(self):  # 4) Enregistrer
+    def case_4(self):  # 4) Enregistrer le tournoi
         tournaments = Tournaments.tournaments_actif
         tournament = self.view.menu_manage_club_case_4_choice(tournaments)
-        if tournament is isinstance(tournament, Tournament):
+        print(tournament)
+        if isinstance(tournament, Tournament):
             tournament.save()
             self.view.menu_manage_club_case_4_done(tournament['name'])
         else:
@@ -122,8 +132,8 @@ class ControllerMenu:
         return
 
     def case_5(self):  # 5) Charger un tournoi
-        self.controller_tournament.load_tournament()
-        return
+        self.load = 1
+        return 'load'
 
     @staticmethod
     def case_6():  # 6) retour
@@ -139,6 +149,8 @@ class ControllerMenu:
         while menu != 'quit':
             choice = self.view.menu_manage_club()
             menu = self.choice(choice)
+            if menu == 'load':
+                return 'load'
         return
 
 

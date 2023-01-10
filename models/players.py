@@ -18,7 +18,7 @@ class Player(dict):
         'ranking_Elo': 12
         'score:': 0
         'score_last_match' : 0
-        'tournaments': 'T1',"T3"
+        'tournaments': [["T1", score], ["T3", score]]
         }
     """
 
@@ -36,13 +36,16 @@ class Player(dict):
         self['score_last_match'] = 0
 
     def __str__(self):
+        tournament_played = ""
+        for tournament in self['tournaments']:
+            tournament_played += f"Tournoi {tournament[0]}, {tournament[1]} pt(s)"
         return f"- family name : {self['family_name']}, " \
                f"first name : {self['first_name']},\n" \
                f"- date of birth : {self['date_of_birth']}, " \
                f"sex : {self['sex']},\n" \
                f"- ranking : {self['ranking']}, " \
                f"score : {self['score']},\n" \
-               f"- tournaments played : {self['tournaments']}.\n"
+               f"- tournaments played : {tournament_played}.\n"
 
     @staticmethod
     def correspond_player(player_temp: dict):
@@ -151,7 +154,7 @@ class PlayersId:
         else:
             list_player = cls.ids_to_dicts(cls.players_IDs)
             for player in range(len(list_player)):
-                text = f"Joueur {player + 1}:\n{list_player[player]}"
+                text += f"Joueur {player + 1}:\n{list_player[player]}"
         return text
 
     @classmethod

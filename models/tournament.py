@@ -48,7 +48,8 @@ class Tournament(dict):
                f"a {self['number_total_round']} rondes, le type du jeux est " \
                f"{self['type_game_time']},\n" \
                f"liste des rounds : {self['rounds']}\n" \
-               f"liste des joueurs : {self['players']}\n"
+               f"liste des joueurs : {self['players']}\n" \
+               f"Description : {self['description']}\n"
 
     def tournament_players(self, list_player_id):
         self['players'] = list_player_id
@@ -57,6 +58,12 @@ class Tournament(dict):
         name = self['name']
         db = TinyDB(PATH)
         tournaments_table = db.table(name)  # pour le tournoi regroupant tout
+        list_players = PlayersId.ids_to_dicts(self['players'])
+        for player, player_id in zip(list_players, self['players']):
+            for tournament in player['tournaments']:
+                if tournament[0] == self['name']:
+                    tournament[1] = player['score']
+            player.modify(player, player_id)
         tournaments_table.upsert(self, where('name') == self['name'])
 
     @staticmethod
@@ -155,7 +162,8 @@ class Tournaments(list):
         """
         text = ""
         for x in range(len(cls.list_tournament)):
-            text += f"Tournoi {cls.list_tournament[x]} :\n{Tournament.load(cls.list_tournament[x])}"
+            text += f"\nTournoi {cls.list_tournament[x]} :\n" \
+                    f"{Tournament.load(cls.list_tournament[x])}"
         return text
 
 
@@ -180,60 +188,14 @@ class Round(dict):
         self['list_matches']: List[Match] = []
 
     def __str__(self):
+        list_matches = ""
+        for match in self['list_matches']:
+            list_matches += f"{match}\n"
         return f"\nLa ronde {self['name']} commencé le " \
                f"{self['starting_date']} à {self['starting_time']}\n" \
                f"\nListe des matchs :\n\n" \
-               f"{self['list_matches'][0]}\n" \
-               f"{self['list_matches'][1]}\n" \
-               f"{self['list_matches'][2]}\n" \
-               f"{self['list_matches'][3]}\n" \
+               f"{list_matches}\n" \
                f"Finis le {self['finish_date']} à {self['finish_time']}\n"
-
-    @staticmethod
-    def instantiate(serialized_round):
-        round_temp = Round
-        try:
-            round_temp.name = serialized_round['name']
-            round_temp.starting_date = serialized_round['starting_date']
-            round_temp.starting_time = serialized_round['starting_time']
-            round_temp.finish_time = serialized_round['finish_time']
-            round_temp.finish_date = serialized_round['finish_date']
-            round_temp.list_results = serialized_round['list_results']
-            round_temp.list_matches = serialized_round['list_matches']
-        except(KeyError, TypeError,):
-            print(f"Base de donnée incorrect pour le round {serialized_round}")
-        finally:
-            if not isinstance(round_temp, Round):
-                raise ValueError("tournoi mal défini!")
-        return round_temp
-
-
-class RoundSerialized(dict):
-
-    def __init__(self):
-        super().__init__()
-        self['name'] = ""
-        self['starting_date'] = ""
-        self['starting_time'] = ""
-        self['finish_time'] = ""
-        self['finish_date'] = ""
-        self['list_results'] = []
-        self['list_matches']: List[Match] = []
-
-    def ready_to_save(self, round_to):
-        """
-
-        :type round_to: Round
-        """
-        self['name'] = round_to.name
-        self['starting_date'] = round_to.starting_date
-        self['starting_time'] = round_to.starting_time
-        self['finish_time'] = round_to.finish_time
-        self['finish_date'] = round_to.finish_date
-        self['list_results'] = round_to.list_results
-        for match_to in round_to.list_matches:
-            self['list_matches'].append(MatchSerialized(match_to))
-        return self
 
 
 class Match(dict):
@@ -275,18 +237,6 @@ class Match(dict):
         player1 = PlayersId.id_to_dict(player1_id)
         player2 = PlayersId.id_to_dict(player2_id)
         return [player1, player2]
-
-
-class MatchSerialized(dict):
-
-    def __init__(self, match_to):
-        """
-
-        :type match_to: Match
-        """
-        super().__init__()
-        self['couple_players_id'] = match_to.couple_players_id
-        self['result_match'] = match_to.result_match
 
 
 # t1 = Tournament('T1', 'Maison', 'bullet')

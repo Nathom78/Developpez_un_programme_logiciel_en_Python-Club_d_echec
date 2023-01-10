@@ -1,5 +1,5 @@
 from models.players import Player, PlayersId
-from models.tournament import Tournaments, Tournament, Round, RoundSerialized, Match
+from models.tournament import Tournaments, Tournament, Round
 from typing import List
 from time import strftime
 
@@ -11,6 +11,9 @@ NUMBER_OF_PLAYERS = 8
 
 
 class ControllerTournaments:
+
+    load = 0
+    fin = 0
 
     def __init__(self, view, controller_menu, method_calcul_round):
         """a list of players, a tournament, some rounds"""
@@ -33,16 +36,21 @@ class ControllerTournaments:
         """
         PlayersId.load_all()
         list_player_id = PlayersId.players_IDs  # tous les joueurs du club
-        while len(self.players) <= NUMBER_OF_PLAYERS:
+        while len(self.players) < NUMBER_OF_PLAYERS:
             # enlever de la liste à afficher, les joueurs deja dans le tournoi
+            print(self.players)
             for id_player in self.players:
-                list_player_id.remove(id_player)
+                try:
+                    list_player_id.remove(id_player)
+                except ValueError:
+                    continue
             # preparer la liste des joueurs à afficher
             list_player = PlayersId.ids_to_dicts(list_player_id)
             text = ""
             for player in range(len(list_player)):
-                text = f"Joueur {player + 1}:\n{list_player[player]}"
+                text += f"\nJoueur {player + 1}:\n{list_player[player]}"
             # Demander via la view le numéro du joueur à ajouter
+            self.view.clear_screen()
             number_in_list = self.view.make_list_player_from_db(text)
             # Voir si ne pas créer un nouveau joueur dans la base
             player_id = 0
@@ -54,6 +62,7 @@ class ControllerTournaments:
                 PlayersId.players_IDs.append(player_id)
             # sinon ajouter le numéro ID indiqué à la liste des joueurs
             elif number_in_list > 0:
+                print()
                 player_id = list_player_id[number_in_list - 1]
             self.players.append(player_id)
 
@@ -68,35 +77,41 @@ class ControllerTournaments:
             parameter = self.view.prompt_for_tournament()
             tournament = Tournament(*parameter)
         elif choice == 2:
-            self.load_tournament()
+            self.load = 1
+            return 'load'
+
         return tournament
 
     def load_tournament(self):
         Tournaments.load_all()
         name_tournament = self.view.menu_manage_club_case_2_2_choice(
             Tournaments.list_tournament)
+        if name_tournament == 0:
+            return
         tournament = Tournament.load(name_tournament)
         self.players = tournament['players']
         # pour plus tard pour plusieurs tournois actifs, ajouter à la liste des tournois ou
         # le rendre unique
         self.tournaments.tournaments_actif = []
         self.tournaments.tournaments_actif.append(tournament)
-        self.run()
 
     def run(self):
         new_tournament: Tournament
         self.view.clear_screen()
-
         # ajouter un tournoi à la liste des tournaments actif, dans le cas futur
         # où plusieurs tournois seront joués en même temps et stock dans la DB le nom
         if not self.tournaments.tournaments_actif:
             new_tournament = self.new_tournament_or_load()
+            if new_tournament == 'load':
+                return
         else:
             new_tournament = self.tournaments.tournaments_actif[0]
         Tournaments.add_db_tournament(new_tournament)
 
         # afficher le menu, afin d'ajouter un joueur au club ou autre
-        self.menu_players_and_lists()
+        load = self.menu_players_and_lists()
+        if load == 'load':
+            return
         self.view.clear_screen()
 
         # Listes des joueurs
@@ -108,14 +123,14 @@ class ControllerTournaments:
         list_players = PlayersId.ids_to_dicts(self.players)
         for player, player_id in zip(list_players, self.players):
             if new_tournament['name'] not in player['tournaments']:
-                player['tournaments'].append(new_tournament['name'])
+                player['tournaments'].append([new_tournament['name'], 0])
                 player['score'] = 0
                 player.modify(player, player_id)
 
         nb_round_max = new_tournament['number_total_round']
         # Détermination du numéro du round en cours
         i = len(new_tournament['rounds'])
-        if i == 0 or (i < nb_round_max and new_tournament['rounds'][i-1].finish_time != ""):
+        if i == 0 or (i < nb_round_max and new_tournament['rounds'][i-1]['finish_time'] != ""):
             i += 1
         if i == nb_round_max and new_tournament['date_end'] != "":
             text = "Tournoi déja remplis"
@@ -129,27 +144,26 @@ class ControllerTournaments:
             # création du round s'il n'existe pas dans le tournoi
             if 0 < i <= nb_round_max and len(new_tournament['rounds']) < i:
                 round_x = Round()
-                round_x.name = f"Round {i}"
+                round_x['name'] = f"Round {i}"
 
                 # Listes des matchs
-                round_x.list_matches = self.method_calcul_round.run(self.players)
+                round_x['list_matches'] = self.method_calcul_round.run(self.players)
 
                 # Stockage du round dans le tournoi et sauvegarde du tournoi
-                round_x_serialized = RoundSerialized().ready_to_save(round_x)
-                new_tournament['rounds'].append(round_x_serialized)
+                new_tournament['rounds'].append(round_x)
                 new_tournament.save()
 
             round_x = new_tournament['rounds'][i-1]
 
             # Stockage des couples de joueurs de chaque match
-            for match in round_x.list_matches:
+            for match in round_x['list_matches']:
                 round_x_couples_players.append(match.match_players_ids_to_players())
 
             # Afin d'afficher les matchs
             self.view.print_match(round_x_couples_players, i)
 
             # remplissage des résultats du round tant que nécessaire
-            while not round_x.finish_time:
+            while not round_x['finish_time']:
                 # Proposition du menu
                 choice = 0
                 while not choice == 1:
@@ -157,10 +171,10 @@ class ControllerTournaments:
 
                 # Matchs
                 m = 0
-                for match, couple in zip(round_x.list_matches, round_x_couples_players):
-                    if round_x.list_results[m] is None:
+                for match, couple in zip(round_x['list_matches'], round_x_couples_players):
+                    if len(round_x['list_results']) == m:
                         result = self.view.input_match_result(couple, m, i)
-                        round_x.list_results.append(result)
+                        round_x['list_results'].append(result)
                         # enregistrer le résultat du match
                         if result == 1:
                             couple[0]['score_last_match'] = 1
@@ -182,12 +196,11 @@ class ControllerTournaments:
                     m += 1
 
                 # Cloture du round
-                round_x.finish_time = strftime('%H:%M:%S')
-                round_x.finish_date = strftime('%d/%m/%Y')
+                round_x['finish_time'] = strftime('%H:%M:%S')
+                round_x['finish_date'] = strftime('%d/%m/%Y')
 
                 # save tournament
-                round_x_serialized = RoundSerialized().ready_to_save(round_x)
-                new_tournament['rounds'][i-1] = round_x_serialized
+                new_tournament['rounds'][i-1] = round_x
                 # Si dernier round est finis
                 if i == nb_round_max:
                     new_tournament['date_end'] = strftime('%d/%m/%Y')
@@ -197,6 +210,7 @@ class ControllerTournaments:
             i += 1
 
         text = f"Tournoi finis le {new_tournament['date_end']} à " \
-               f"{new_tournament['rounds'][nb_round_max].finish_date}"
+               f"{new_tournament['rounds'][nb_round_max]['finish_date']}"
         self.view.menu_manage_club_case_2_print(text)
+        self.fin = 1
 

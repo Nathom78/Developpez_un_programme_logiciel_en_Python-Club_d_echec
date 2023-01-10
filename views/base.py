@@ -2,7 +2,8 @@
 
 import datetime
 import string
-import os
+from os import system, name
+from time import sleep
 
 
 class View:
@@ -48,11 +49,22 @@ class View:
     @staticmethod
     def prompt_for_tournament():
         """Prompt  for information to create a tournament"""
-        name = input("Donner un nom au tournoi :")
-        place = input("Lieu du tournoi :")
-        type_game_time = input("Type du jeu (bullet, blitz, ou coup rapide :")
-        number_total_round = input("Nombre de ronde (par default 4 ) :")
-        description = input("description (facultatif) :")
+        name = input("Donner un nom au tournoi : ")
+        place = input("Lieu du tournoi : ")
+        type_game_time = input("Type du jeu (bullet, blitz, ou coup rapide : ")
+        if_number = False
+        number_total_round = 0
+        while not if_number:
+            number_total_round = input("Nombre de ronde (par default 4 ) : ")
+            if number_total_round == "":
+                number_total_round = 4
+            try:
+                number_total_round = int(number_total_round)
+                if 0 <= number_total_round:
+                    if_number = True
+            except ValueError:
+                print("Veuillez taper un nombre positif")
+        description = input("description (facultatif) : ")
         parameter = [name, place, type_game_time, number_total_round, description]
         return parameter
 
@@ -61,7 +73,6 @@ class View:
         """ Afficher la liste des joueurs et choisir 1 joueur
         Return : List ID's players for tournament
         """
-        View.clear_screen()
         print(text)
         print("Entrer le numéro du joueur, ou 0 pour ajouter un nouveau")
         if_number = False
@@ -85,7 +96,7 @@ class View:
         """
         print("\n1) Enregistrer un nouveau joueur\n2) Listes\n"
               "3) Modifier un joueur\n4) Enregistrer le tournoi\n5) Charger un tournoi"
-              "\n6) Retour")
+              "\n6) Retour\n")
         choice = 0
         if_number = False
         while not if_number:
@@ -181,10 +192,13 @@ class View:
             choice = input("Votre choix : ")
             try:
                 choice = int(choice)
-                if 0 <= choice <= 5:  # number max in menu...
-                    if_number = True
             except ValueError:
                 print("Veuillez taper un nombre entre 0 et 5")
+            else:
+                if 0 <= choice <= 5:  # number max in menu...
+                    if_number = True
+                else:
+                    print("Veuillez taper un nombre entre 0 et 5")
         return choice
 
     @staticmethod
@@ -200,6 +214,8 @@ class View:
                 sort = int(sort)
                 if 0 < sort <= 2:  # number max in menu...
                     if_number = True
+                else:
+                    print("Veuillez taper 1 ou 2")
             except ValueError:
                 print("Veuillez taper 1 ou 2")
         return sort
@@ -216,11 +232,16 @@ class View:
         Choice from the list of tournaments' names
         :return: name of the tournament to print
         """
+        if len(tournaments) == 0:
+            print("Aucun tournoi d'enregistré")
+            sleep(2)
+            return 0
         print("Choisir un tournoi")
         i = 0
         for tournament in tournaments:
             i += 1
             print(f"{i}) {tournament}")
+
         choice = 0
         if_number = False
         while not if_number:
@@ -229,6 +250,8 @@ class View:
                 choice = int(choice)
                 if 0 < choice <= i:
                     if_number = True
+                else:
+                    print(f"Veuillez entrer un nombre entre 1 et {i}")
             except ValueError:
                 print(f"Veuillez entrer un nombre entre 1 et {i}")
         return tournaments[choice - 1]
@@ -245,6 +268,8 @@ class View:
                 choice = int(choice)
                 if 0 < choice <= i:
                     if_number = True
+                else:
+                    print(f"Veuillez entrer un nombre entre 1 et {i}")
             except ValueError:
                 print(f"Veuillez entrer un nombre entre 1 et {i}")
         return choice
@@ -312,10 +337,12 @@ class View:
                     if_number = True
                 else:
                     ranking = int(ranking)
+                    if ranking < 0:
+                        raise ValueError
                     player_modify['ranking'] = ranking
                     if_number = True
             except ValueError:
-                print("Veuillez taper un nombre")
+                print("Veuillez taper un nombre positif")
 
         if_number = False
         while not if_number:
@@ -325,10 +352,12 @@ class View:
                 if_number = True
             try:
                 score = int(score)
+                if score < 0:
+                    raise ValueError
                 player_modify['score'] = score
                 if_number = True
             except ValueError:
-                print("Veuillez taper un nombre")
+                print("Veuillez taper un nombre positif")
 
         return player_modify
 
@@ -340,13 +369,15 @@ class View:
     @staticmethod
     def menu_manage_club_case_4_choice(tournaments):
         """Choice of the tournament to save
-        :param tournaments: Tournaments.tournaments_actifs
+        :param tournaments: Tournaments dans les Tournaments_actif
         :return: the tournament
         """
+
         i = 0
         for tournament in tournaments:
             i += 1
-            print(f"choix {i} :\n" + tournament)
+            print(f"\nchoix {i} :")
+            print(tournament)
         choice = 0
         if_number = False
         while not if_number:
@@ -355,6 +386,8 @@ class View:
                 choice = int(choice)
                 if 0 < choice <= i:
                     if_number = True
+                else:
+                    print(f"Veuillez entrer un nombre entre 1 et {i}")
             except ValueError:
                 print(f"Veuillez entrer un nombre entre 1 et {i}")
         return tournaments[choice-1]
@@ -367,11 +400,12 @@ class View:
     @staticmethod
     def clear_screen():
         # It is for macOS and Linux(here, os.name is 'posix')
-        if os.name == 'posix':
-            _ = os.system('clear')
+        if name == 'posix':
+            system('clear')
+
         else:
             # It is for Windows platform
-            _ = os.system('cls')
+            system('cls')
 
     @staticmethod
     def print_match(couples_players, i):
