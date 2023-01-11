@@ -1,7 +1,7 @@
 from models.players import Player, PlayersId
 from models.tournament import Tournaments, Tournament, Round
 from typing import List
-from time import strftime
+from time import strftime, sleep
 
 from controllers.club_manage import ControllerMenu
 from controllers.system_swiss import ControllerSwiss
@@ -104,9 +104,10 @@ class ControllerTournaments:
             new_tournament = self.new_tournament_or_load()
             if new_tournament == 'load':
                 return
+            else:
+                Tournaments.add_db_tournament(new_tournament)
         else:
-            new_tournament = self.tournaments.tournaments_actif[0]
-        Tournaments.add_db_tournament(new_tournament)
+            new_tournament = self.tournaments.tournaments_actif[-1]
 
         # afficher le menu, afin d'ajouter un joueur au club ou autre
         load = self.menu_players_and_lists()
@@ -122,13 +123,18 @@ class ControllerTournaments:
         # et initialiser son score si le joueur n'était pas dans le tournoi
         list_players = PlayersId.ids_to_dicts(self.players)
         for player, player_id in zip(list_players, self.players):
-            if new_tournament['name'] not in player['tournaments']:
+            print(player['tournaments'])
+            if_exist = False
+            for player_tournament in player['tournaments']:
+                if new_tournament['name'] == player_tournament[0]:
+                    if_exist = True
+            if not if_exist:
                 player['tournaments'].append([new_tournament['name'], 0])
-                player['score'] = 0
-                player.modify(player, player_id)
+            player['score'] = 0
+            player.modify(player, player_id)
 
-        nb_round_max = new_tournament['number_total_round']
         # Détermination du numéro du round en cours
+        nb_round_max = new_tournament['number_total_round']
         i = len(new_tournament['rounds'])
         if i == 0 or (i < nb_round_max and new_tournament['rounds'][i-1]['finish_time'] != ""):
             i += 1
@@ -152,6 +158,10 @@ class ControllerTournaments:
                 # Stockage du round dans le tournoi et sauvegarde du tournoi
                 new_tournament['rounds'].append(round_x)
                 new_tournament.save()
+                text = "Tournoi sauvegardé"
+                self.view.menu_manage_club_case_2_print(text)
+                sleep(2)
+                self.view.clear_screen()
 
             round_x = new_tournament['rounds'][i-1]
 
@@ -163,34 +173,44 @@ class ControllerTournaments:
             self.view.print_match(round_x_couples_players, i)
 
             # remplissage des résultats du round tant que nécessaire
-            while not round_x['finish_time']:
+            while round_x['finish_time'] == "":
                 # Proposition du menu
                 choice = 0
                 while not choice == 1:
                     choice = self.view.ask_resultat_or_menu()
+                    if choice == 2:
+                        load = self.menu_players_and_lists()
+                        if load == 'load':
+                            return
+                    self.view.clear_screen()
 
                 # Matchs
                 m = 0
                 for match, couple in zip(round_x['list_matches'], round_x_couples_players):
                     if len(round_x['list_results']) == m:
-                        result = self.view.input_match_result(couple, m, i)
-                        round_x['list_results'].append(result)
-                        # enregistrer le résultat du match
-                        if result == 1:
-                            couple[0]['score_last_match'] = 1
-                            couple[1]['score_last_match'] = 0
-                        if result == 2:
-                            couple[0]['score_last_match'] = 0
-                            couple[1]['score_last_match'] = 1
-                        if result == 3:
-                            couple[0]['score_last_match'] = 0.5
-                            couple[1]['score_last_match'] = 0.5
-                        if result == 4:
-                            self.menu_players_and_lists()
+                        result_ok = False
+                        while not result_ok:
+                            result = self.view.input_match_result(couple, m, i)
+                            # enregistrer le résultat du match
+                            if result == 1:
+                                couple[0]['score_last_match'] = 1
+                                couple[1]['score_last_match'] = 0
+                            if result == 2:
+                                couple[0]['score_last_match'] = 0
+                                couple[1]['score_last_match'] = 1
+                            if result == 3:
+                                couple[0]['score_last_match'] = 0.5
+                                couple[1]['score_last_match'] = 0.5
+                            if result == 4:
+                                self.menu_players_and_lists()
+                            else:
+                                round_x['list_results'].append(result)
+                                result_ok = True
                         # création du tuple resultat du match
                         match.match_result()
-                        # mise à jour dans db des joueurs
-                        for player, player_id in zip(couple, match.couple_players_id):
+                        round_x['list_matches'][m] = match
+                        # mise à jour des scores dans db des joueurs
+                        for player, player_id in zip(couple, match['couple_players_id']):
                             player['score'] += player['score_last_match']
                             Player.modify(player, player_id)
                     m += 1
@@ -207,6 +227,8 @@ class ControllerTournaments:
                 new_tournament.save()
                 text = "Tournoi sauvegardé"
                 self.view.menu_manage_club_case_2_print(text)
+                sleep(2)
+                self.view.clear_screen()
             i += 1
 
         text = f"Tournoi finis le {new_tournament['date_end']} à " \

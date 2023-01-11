@@ -75,6 +75,7 @@ class ControllerMenu:
             for ronde in tournament['rounds']:
                 text += f"{ronde}\n"
             self.view.menu_manage_club_case_2_print(text)
+            return
 
         # ●	5) Liste de tous les matchs d'un tournoi.
         elif choice == 5:
@@ -86,19 +87,27 @@ class ControllerMenu:
             tournament: Tournament = Tournament.load(name_tournament)
             for ronde in tournament['rounds']:
                 for match in ronde['list_matches']:
-                    ([player1_id, player1_score], [player2_id, player2_score]) = \
-                        match['result_match']
-                    player1 = PlayersId.id_to_dict(player1_id)
-                    player2 = PlayersId.id_to_dict(player2_id)
-                    if player1_score > player2_score:
-                        winner = f"{player1['family_name']} {player1['first_name']}"
-                    elif player1_score < player2_score:
-                        winner = f"{player1['family_name']} {player1['first_name']}"
+
+                    try:
+                        ([player1_id, player1_score], [player2_id, player2_score]) = \
+                            match['result_match']
+                    except ValueError:
+                        [player1, player2] = match.match_players_ids_to_players()
+                        text = f"Match {player1['family_name']} {player1['first_name']} " \
+                               f"contre {player2['family_name']} {player2['first_name']} :\n" \
+                               f"match non joué"
                     else:
-                        winner = "match nul"
-                    text = f"Match {player1['family_name']} {player1['first_name']} " \
-                           f"contre {player2['family_name']} {player2['first_name']}\n " \
-                           f"Le gagnant est : {winner}"
+                        player1 = PlayersId.id_to_dict(player1_id)
+                        player2 = PlayersId.id_to_dict(player2_id)
+                        if player1_score > player2_score:
+                            winner = f"{player1['family_name']} {player1['first_name']}"
+                        elif player1_score < player2_score:
+                            winner = f"{player1['family_name']} {player1['first_name']}"
+                        else:
+                            winner = "match nul"
+                        text = f"Match {player1['family_name']} {player1['first_name']} " \
+                               f"contre {player2['family_name']} {player2['first_name']}\n" \
+                               f"Le gagnant est : {winner}"
                     self.view.menu_manage_club_case_2_print(text)
         return
 
@@ -123,7 +132,6 @@ class ControllerMenu:
     def case_4(self):  # 4) Enregistrer le tournoi
         tournaments = Tournaments.tournaments_actif
         tournament = self.view.menu_manage_club_case_4_choice(tournaments)
-        print(tournament)
         if isinstance(tournament, Tournament):
             tournament.save()
             self.view.menu_manage_club_case_4_done(tournament['name'])
@@ -152,7 +160,6 @@ class ControllerMenu:
             if menu == 'load':
                 return 'load'
         return
-
 
 # from views.base import View
 #

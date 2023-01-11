@@ -43,11 +43,14 @@ class Tournament(dict):
         self['description'] = description
 
     def __str__(self):
+        list_round = ""
+        for ronde in self['rounds']:
+            list_round += f"{ronde}"
         return f"Le tournoi {self['name']} du lieu {self['place']} commencé le " \
                f"{self['date_creation']}\n" \
                f"a {self['number_total_round']} rondes, le type du jeux est " \
                f"{self['type_game_time']},\n" \
-               f"liste des rounds : {self['rounds']}\n" \
+               f"liste des rounds : {list_round}\n" \
                f"liste des joueurs : {self['players']}\n" \
                f"Description : {self['description']}\n"
 
@@ -79,13 +82,43 @@ class Tournament(dict):
                                     tournament_temp['date_creation'])
             tournament['date_end'] = tournament_temp['date_end']
             tournament['players'] = tournament_temp['players']
-            tournament['rounds'] = tournament_temp['rounds']
+            tournament['rounds'] = []
         except(KeyError, TypeError,):
             print(f"Base de donnée incorrect pour le tournoi {tournament_temp}")
+        else:
+            for ronde in tournament_temp['rounds']:
+                tournament['rounds'].append(Tournament.instance_round(ronde))
         finally:
             if not isinstance(tournament, Tournament):
                 raise ValueError("tournoi mal défini!")
         return tournament
+
+    @staticmethod
+    def instance_round(round_temp: dict):
+        round_instance = Round()
+        round_instance['name'] = round_temp['name']
+        round_instance['starting_date'] = round_temp['starting_date']
+        round_instance['starting_time'] = round_temp['starting_time']
+        round_instance['finish_time'] = round_temp['finish_time']
+        round_instance['finish_date'] = round_temp['finish_date']
+        round_instance['list_results'] = round_temp['list_results']
+        round_instance['list_matches'] = []
+        for match in round_temp['list_matches']:
+            round_instance['list_matches'].append(Tournament.instance_match(match))
+        return round_instance
+
+    @staticmethod
+    def instance_match(match_temp: dict):
+        match_instance = Match(match_temp['couple_players_id'])
+        match_instance['result_match']: Tuple
+        if not isinstance(match_instance, Match):
+            raise ValueError("Match mal défini!")
+        else:
+            try:
+                match_instance['result_match'] = tuple(match_temp['result_match'])
+            except KeyError:
+                match_instance['result_match'] = ()
+        return match_instance
 
     @staticmethod
     def load(name):
@@ -214,14 +247,18 @@ class Match(dict):
 
     def __str__(self):
         [player1, player2] = self.match_players_ids_to_players()
-        ([_, player1_result], [_, player2_result]) = self['result_match']
-        return f"Match {player1['family_name']} {player1['first_name']} " \
-               f"contre {player2['family_name']} {player2['first_name']}\n" \
-               f"le resultat est :\n" \
-               f"{player1['family_name']} {player1['first_name']} " \
+        try:
+            ([_, player1_result], [_, player2_result]) = self['result_match']
+        except ValueError:
+            text_match = "match non inscrit."
+        else:
+            text_match = f"{player1['family_name']} {player1['first_name']} " \
                f"a {player1_result} point\n" \
                f"{player2['family_name']} {player2['first_name']} " \
-               f"a {player2_result} point\n"
+               f"a {player2_result} point"
+        return f"Match {player1['family_name']} {player1['first_name']} " \
+               f"contre {player2['family_name']} {player2['first_name']}\n" \
+               f"le resultat est :\n{text_match}"
 
     def match_result(self):
         [player1, player2] = self.match_players_ids_to_players()
@@ -229,7 +266,7 @@ class Match(dict):
         player2_id = self['couple_players_id'][1]
         player1_result = player1['score_last_match']
         player2_result = player2['score_last_match']
-        self['result_match'] = ([player1_id, player1_result], [player2_id, player2_result])
+        self['result_match']: Tuple = ([player1_id, player1_result], [player2_id, player2_result])
 
     def match_players_ids_to_players(self):
         player1_id = self['couple_players_id'][0]

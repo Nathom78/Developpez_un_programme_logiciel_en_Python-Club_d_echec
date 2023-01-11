@@ -49,7 +49,7 @@ class View:
     @staticmethod
     def prompt_for_tournament():
         """Prompt  for information to create a tournament"""
-        name = input("Donner un nom au tournoi : ")
+        name_t = input("Donner un nom au tournoi : ")
         place = input("Lieu du tournoi : ")
         type_game_time = input("Type du jeu (bullet, blitz, ou coup rapide : ")
         if_number = False
@@ -65,7 +65,7 @@ class View:
             except ValueError:
                 print("Veuillez taper un nombre positif")
         description = input("description (facultatif) : ")
-        parameter = [name, place, type_game_time, number_total_round, description]
+        parameter = [name_t, place, type_game_time, number_total_round, description]
         return parameter
 
     @staticmethod
@@ -372,7 +372,6 @@ class View:
         :param tournaments: Tournaments dans les Tournaments_actif
         :return: the tournament
         """
-
         i = 0
         for tournament in tournaments:
             i += 1
@@ -415,7 +414,7 @@ class View:
         :return: list resultat
         """
         # Affiche le round et les matches à jouer
-        print(f"Ronde {i}: ")
+        print(f"\nRonde {i}: ")
         x = 0
         for [player1, player2] in couples_players:
             x += 1
@@ -425,9 +424,9 @@ class View:
     @staticmethod
     def input_match_result(couple_players, number_match, number_round):
         # Attend les résultats des matchs
-        print(f" Rentrer les résultats de la ronde {number_round}: ")
+        print(f"\nRentrer les résultats de la ronde {number_round}: ")
         [player1, player2] = couple_players
-        print(f"Resultat du match {number_match} : \nopposant le joueur 1 "
+        print(f"Resultat du match {number_match + 1} : \nopposant le joueur 1 "
               f"{player1['family_name']} {player1['first_name']}\n"
               f"contre le joueur 2 {player2['family_name']} {player2['first_name']} : ")
         print("1) Joueur 1 a gagné\n2) Joueur 2 a gagné\n3) Match nul\n4) Menu")

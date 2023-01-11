@@ -38,7 +38,7 @@ class Player(dict):
     def __str__(self):
         tournament_played = ""
         for tournament in self['tournaments']:
-            tournament_played += f"Tournoi {tournament[0]}, {tournament[1]} pt(s)"
+            tournament_played += f"Tournoi {tournament[0]}: {tournament[1]} pt(s), "
         return f"- family name : {self['family_name']}, " \
                f"first name : {self['first_name']},\n" \
                f"- date of birth : {self['date_of_birth']}, " \
