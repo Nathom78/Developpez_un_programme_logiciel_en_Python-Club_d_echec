@@ -441,4 +441,3 @@ class View:
             except ValueError:
                 print("Veuillez taper un chiffre, soit 1, 2, 3 ou 4")
         return result_match
-

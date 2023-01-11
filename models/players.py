@@ -1,5 +1,4 @@
 import string
-from typing import List
 from tinydb import TinyDB
 
 #  Path to database Tiny

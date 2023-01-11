@@ -1,7 +1,7 @@
 from typing import List, Tuple
 from time import strftime
 from tinydb import TinyDB, where
-from models.players import PlayersId, Player
+from models.players import PlayersId
 
 PATH = 'database/tournaments.json'
 NAME_PLAYERS_TABLE = 'players'

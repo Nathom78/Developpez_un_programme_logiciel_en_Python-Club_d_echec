@@ -235,4 +235,3 @@ class ControllerTournaments:
                f"{new_tournament['rounds'][nb_round_max]['finish_date']}"
         self.view.menu_manage_club_case_2_print(text)
         self.fin = 1
-
