@@ -58,7 +58,7 @@ class Player(dict):
             player['opponents'] = player_temp['opponents']
             player['score_last_match'] = player_temp['score_last_match']
 
-        except(KeyError, TypeError,):
+        except (KeyError, TypeError,):
             print(f"Base de donnée incorrect pour le joueur {player_temp}")
         finally:
             if not isinstance(player, Player):

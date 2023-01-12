@@ -83,7 +83,7 @@ class Tournament(dict):
             tournament['date_end'] = tournament_temp['date_end']
             tournament['players'] = tournament_temp['players']
             tournament['rounds'] = []
-        except(KeyError, TypeError,):
+        except (KeyError, TypeError,):
             print(f"Base de donnée incorrect pour le tournoi {tournament_temp}")
         else:
             for ronde in tournament_temp['rounds']:
