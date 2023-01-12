@@ -2,3 +2,5 @@
 Projet OpenClassrooms 
 
 Temporaire : créer un repertoire /database à la racine 
+
+ flake8 --format=html --htmldir=flake8_rapport
