@@ -1,5 +1,5 @@
 """main"""
-
+from os import makedirs
 from controllers.base import ControllerTournaments
 from controllers.club_manage import ControllerMenu
 from controllers.system_swiss import ControllerSwiss
@@ -8,6 +8,9 @@ from views.base import View
 
 
 def main():
+    # création du repertoire database si besoin
+    makedirs('database', exist_ok=True)
+
     view = View
     menu = ControllerMenu(view)
     method_calcul_round = ControllerSwiss
