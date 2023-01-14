@@ -72,7 +72,9 @@ class ControllerTournaments:
         choice = self.view.ask_start()
         tournament = Tournament
         if choice == 1:
-            parameter = self.view.prompt_for_tournament()
+            Tournaments.load_all()
+            exist_names = Tournaments.list_tournament
+            parameter = self.view.prompt_for_tournament(exist_names)
             tournament = Tournament(*parameter)
         elif choice == 2:
             self.load = 1
@@ -112,16 +114,13 @@ class ControllerTournaments:
         else:
             new_tournament = self.tournaments.tournaments_actif[-1]
 
-        # afficher le menu, afin d'ajouter un joueur au club ou autre
-        load = self.menu_players_and_lists()
-        if load == 'load':
-            return
-        self.view.clear_screen()
-
         # Listes des joueurs
-        if len(self.players) < 8:
+        if len(self.players) < NUMBER_OF_PLAYERS:
             self.get_players()
-        new_tournament.tournament_players(self.players)
+            if len(self.players) == NUMBER_OF_PLAYERS:
+                new_tournament.tournament_players(self.players)
+                new_tournament.init_opponent()
+
         # ajouter le nom du tournoi à la liste des tournois joué par le joueur
         # et initialiser son score si le joueur n'était pas dans le tournoi
         list_players = PlayersId.ids_to_dicts(self.players)
@@ -132,9 +131,10 @@ class ControllerTournaments:
                     if_exist = True
             if not if_exist:
                 player['tournaments'].append([new_tournament['name'], 0])
-            player['score'] = 0
-            player['opponents'] = []
-            player.modify(player, player_id)
+                player['score'] = 0
+                player.modify(player, player_id)
+
+        new_tournament.save()
 
         # Détermination du numéro du round en cours
         nb_round_max = new_tournament['number_total_round']
@@ -156,8 +156,8 @@ class ControllerTournaments:
                 round_x['name'] = f"Round {i}"
 
                 # Listes des matchs
-                round_x['list_matches'] = self.method_calcul_round.run(self.players, i)
-
+                round_x['list_matches'] = self.method_calcul_round.run(self.players, new_tournament,
+                                                                       i)
                 # Stockage du round dans le tournoi et sauvegarde du tournoi
                 new_tournament['rounds'].append(round_x)
                 new_tournament.save()
@@ -173,7 +173,10 @@ class ControllerTournaments:
                 round_x_couples_players.append(match.match_players_ids_to_players())
 
             # Afin d'afficher les matchs
-            self.view.print_match(round_x_couples_players, i)
+            nb_match = int(NUMBER_OF_PLAYERS/2)
+            list_color = self.method_calcul_round.color(nb_match)
+            self.view.print_match(round_x_couples_players, i, list_color)
+            self.view.wait()
 
             # remplissage des résultats du round tant que nécessaire
             while round_x['finish_time'] == "":
@@ -205,17 +208,24 @@ class ControllerTournaments:
                                 couple[0]['score_last_match'] = 0.5
                                 couple[1]['score_last_match'] = 0.5
                             if result == 4:
-                                self.menu_players_and_lists()
+                                # save tournament
+                                new_tournament['rounds'][i - 1] = round_x
+                                new_tournament.save()
+                                load = self.menu_players_and_lists()
+                                if load == 'load':
+                                    return
                             else:
                                 round_x['list_results'].append(result)
                                 result_ok = True
-                        # création du tuple resultat du match
-                        match.match_result()
-                        round_x['list_matches'][m] = match
+
                         # mise à jour des scores dans db des joueurs
                         for player, player_id in zip(couple, match['couple_players_id']):
                             player['score'] += player['score_last_match']
                             Player.modify(player, player_id)
+
+                        # création du tuple resultat du match
+                        match.match_result()
+                        round_x['list_matches'][m] = match
                     m += 1
 
                 # Cloture du round

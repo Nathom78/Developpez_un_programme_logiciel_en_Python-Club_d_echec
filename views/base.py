@@ -47,9 +47,16 @@ class View:
         return choice
 
     @staticmethod
-    def prompt_for_tournament():
+    def prompt_for_tournament(exist_names):
         """Prompt  for information to create a tournament"""
-        name_t = input("Donner un nom au tournoi : ")
+        not_exist = False
+        name_t = ""
+        while not not_exist:
+            name_t = input("Donner un nom au tournoi : ")
+            if name_t not in exist_names:
+                not_exist = True
+            else:
+                print("Nom déja existant")
         place = input("Lieu du tournoi : ")
         type_game_time = input("Type du jeu (bullet, blitz, ou coup rapide : ")
         if_number = False
@@ -74,7 +81,7 @@ class View:
         Return : List ID's players for tournament
         """
         print(text)
-        print("Entrer le numéro du joueur, ou 0 pour ajouter un nouveau")
+        print("Entrer le numéro du joueur à ajouter, ou 0 pour ajouter un nouveau")
         if_number = False
         number_in_list = 0
         while not if_number:
@@ -96,7 +103,7 @@ class View:
         """
         print("\n1) Enregistrer un nouveau joueur\n2) Listes\n"
               "3) Modifier un joueur\n4) Enregistrer le tournoi\n5) Charger un tournoi"
-              "\n6) Retour\n")
+              "\n6) Continuer\n")
         choice = 0
         if_number = False
         while not if_number:
@@ -119,18 +126,16 @@ class View:
         if_str = False
         while not if_str:
             family_name = input("tapez le nom de famille du joueur :")
-            try:  # remplacer par if
-                if_str = family_name.isalpha()
-            except ValueError:
+            if_str = family_name.isalpha()
+            if not if_str:
                 print("Veuillez mettre seulement des lettres")
 
         first_name = ""
         if_str = False
         while not if_str:
             first_name = input("tapez le prénom du joueur :")
-            try:  # remplacer par if
-                if_str = first_name.isalpha()
-            except ValueError:
+            if_str = first_name.isalpha()
+            if not if_str:
                 print("Veuillez mettre seulement des lettres")
 
         date_of_birth = ""
@@ -147,7 +152,7 @@ class View:
         if_sex = False
         while not if_sex:
             sex = input("tapez le genre du joueur (M ou F) : ")
-            if sex == ("M" or "F" or "m" or "f"):
+            if sex == "M" or "F" or "m" or "f":
                 if_sex = True
             else:
                 print("Mauvaise lettre")
@@ -376,7 +381,7 @@ class View:
         for tournament in tournaments:
             i += 1
             print(f"\nchoix {i} :")
-            print(tournament)
+            print(tournament['name'])
         choice = 0
         if_number = False
         while not if_number:
@@ -407,8 +412,9 @@ class View:
             system('cls')
 
     @staticmethod
-    def print_match(couples_players, i):
+    def print_match(couples_players, i, list_color):
         """
+        :param list_color: Liste de nb_match fois avec soit blanc ou noir
         :param i: the number of the round
         :param couples_players:
         :return: list resultat
@@ -416,10 +422,11 @@ class View:
         # Affiche le round et les matches à jouer
         print(f"\nRonde {i}: ")
         x = 0
-        for [player1, player2] in couples_players:
+        for [player1, player2], color in zip(couples_players, list_color):
             x += 1
             print(f"match {x} opposant {player1['family_name']} {player1['first_name']} "
-                  f"contre {player2['family_name']} {player2['first_name']}")
+                  f"contre {player2['family_name']} {player2['first_name']}\n "
+                  f"Joueur {player1['family_name']} {player1['first_name']} prends les {color}s")
 
     @staticmethod
     def input_match_result(couple_players, number_match, number_round):
@@ -441,3 +448,9 @@ class View:
             except ValueError:
                 print("Veuillez taper un chiffre, soit 1, 2, 3 ou 4")
         return result_match
+
+    @staticmethod
+    def wait():
+        print("appuyer sur entrer pour continuer")
+        input()
+        return

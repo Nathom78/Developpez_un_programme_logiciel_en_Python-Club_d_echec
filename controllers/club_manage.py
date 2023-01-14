@@ -89,7 +89,8 @@ class ControllerMenu:
                 return
             tournament: Tournament = Tournament.load(name_tournament)
             for ronde in tournament['rounds']:
-                print(ronde['name'])
+                text = f"\n{ronde['name']}"
+                self.view.menu_manage_club_case_2_print(text)
                 for match in ronde['list_matches']:
 
                     try:
@@ -99,7 +100,7 @@ class ControllerMenu:
                         [player1, player2] = match.match_players_ids_to_players()
                         text = f"Match {player1['family_name']} {player1['first_name']} " \
                                f"contre {player2['family_name']} {player2['first_name']} :\n" \
-                               f"match non joué"
+                               f"match non joué\n"
                     else:
                         player1 = PlayersId.id_to_dict(player1_id)
                         player2 = PlayersId.id_to_dict(player2_id)
@@ -112,6 +113,7 @@ class ControllerMenu:
                         text = f"Match {player1['family_name']} {player1['first_name']} " \
                                f"contre {player2['family_name']} {player2['first_name']}\n" \
                                f"Le gagnant est : {winner}\n"
+
                     self.view.menu_manage_club_case_2_print(text)
         return
 

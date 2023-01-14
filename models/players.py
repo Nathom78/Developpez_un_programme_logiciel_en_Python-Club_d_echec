@@ -31,7 +31,6 @@ class Player(dict):
         self['ranking'] = ranking
         self['score'] = score
         self['tournaments'] = []
-        self['opponents'] = []
         self['score_last_match'] = 0
 
     def __str__(self):
@@ -55,7 +54,6 @@ class Player(dict):
                             player_temp['date_of_birth'], player_temp['sex'],
                             player_temp['ranking'], player_temp['score'])
             player['tournaments'] = player_temp['tournaments']
-            player['opponents'] = player_temp['opponents']
             player['score_last_match'] = player_temp['score_last_match']
 
         except (KeyError, TypeError,):

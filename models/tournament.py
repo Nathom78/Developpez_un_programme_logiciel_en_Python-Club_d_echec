@@ -1,7 +1,7 @@
 from typing import List, Tuple
 from time import strftime
 from tinydb import TinyDB, where
-from models.players import PlayersId, Player
+from models.players import PlayersId
 
 PATH = 'database/tournaments.json'
 NAME_PLAYERS_TABLE = 'players'
@@ -41,8 +41,12 @@ class Tournament(dict):
         self['players'] = []
         self['type_game_time'] = type_game_time
         self['description'] = description
+        self['opponents'] = {}
 
     def __str__(self):
+        list_player = ""
+        for player in PlayersId.ids_to_dicts(self['players']):
+            list_player += f"{player}"
         list_round = ""
         for ronde in self['rounds']:
             list_round += f"{ronde}"
@@ -50,12 +54,18 @@ class Tournament(dict):
                f"{self['date_creation']}\n" \
                f"a {self['number_total_round']} rondes, le type du jeux est " \
                f"{self['type_game_time']},\n" \
+               f"liste des joueurs : \n" \
+               f"{list_player}\n" \
                f"liste des rounds : {list_round}\n" \
-               f"liste des joueurs : {self['players']}\n" \
                f"Description : {self['description']}\n"
 
     def tournament_players(self, list_player_id):
         self['players'] = list_player_id
+
+    def init_opponent(self):
+        for player_id in self['players']:
+            key = str(player_id)
+            self['opponents'][key] = []
 
     def save(self):
         name = self['name']
@@ -68,6 +78,15 @@ class Tournament(dict):
                     tournament[1] = player['score']
             player.modify(player, player_id)
         tournaments_table.upsert(self, where('name') == self['name'])
+
+    def add_opponent(self, player_id, opponent_id):
+        last_opponents_p1 = self['opponents'][f"{player_id}"]
+        last_opponents_p2 = self['opponents'][f"{opponent_id}"]
+        last_opponents_p1.append(opponent_id)
+        last_opponents_p2.append(player_id)
+        self['opponents'][f"{player_id}"] = last_opponents_p1
+        self['opponents'][f"{opponent_id}"] = last_opponents_p2
+        self.save()
 
     @staticmethod
     def correspond_tournament(tournament_temp: dict):
@@ -83,6 +102,7 @@ class Tournament(dict):
             tournament['date_end'] = tournament_temp['date_end']
             tournament['players'] = tournament_temp['players']
             tournament['rounds'] = []
+            tournament['opponents'] = tournament_temp['opponents']
         except (KeyError, TypeError,):
             print(f"Base de donnée incorrect pour le tournoi {tournament_temp}")
         else:
@@ -224,9 +244,9 @@ class Round(dict):
         list_matches = ""
         for match in self['list_matches']:
             list_matches += f"{match}\n"
-        return f"\nLa ronde {self['name']} commencé le " \
+        return f"\n\nLa ronde {self['name']} commencé le " \
                f"{self['starting_date']} à {self['starting_time']}\n" \
-               f"\nListe des matchs :\n\n" \
+               f"\nListe des matchs :\n" \
                f"{list_matches}\n" \
                f"Finis le {self['finish_date']} à {self['finish_time']}\n"
 
@@ -253,10 +273,10 @@ class Match(dict):
             text_match = "match non inscrit."
         else:
             text_match = f"{player1['family_name']} {player1['first_name']} " \
-               f"a {player1_result} point\n" \
-               f"{player2['family_name']} {player2['first_name']} " \
-               f"a {player2_result} point"
-        return f"Match {player1['family_name']} {player1['first_name']} " \
+                         f"a {player1_result} point\n" \
+                         f"{player2['family_name']} {player2['first_name']} " \
+                         f"a {player2_result} point"
+        return f"\nMatch {player1['family_name']} {player1['first_name']} " \
                f"contre {player2['family_name']} {player2['first_name']}\n" \
                f"le resultat est :\n{text_match}"
 
@@ -273,10 +293,3 @@ class Match(dict):
         player2_id = self['couple_players_id'][1]
         [player1, player2] = PlayersId.ids_to_dicts([player1_id, player2_id])
         return [player1, player2]
-
-    def add_opponents(self):
-        [player1, player2] = self.match_players_ids_to_players()
-        player1['opponents'].append(self['couple_players_id'][1])
-        player2['opponents'].append(self['couple_players_id'][0])
-        Player.modify(player1, self['couple_players_id'][0])
-        Player.modify(player2, self['couple_players_id'][1])
