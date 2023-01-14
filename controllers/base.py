@@ -38,7 +38,6 @@ class ControllerTournaments:
         list_player_id = PlayersId.players_IDs  # tous les joueurs du club
         while len(self.players) < NUMBER_OF_PLAYERS:
             # enlever de la liste à afficher, les joueurs deja dans le tournoi
-            print(self.players)
             for id_player in self.players:
                 try:
                     list_player_id.remove(id_player)
@@ -62,7 +61,6 @@ class ControllerTournaments:
                 PlayersId.players_IDs.append(player_id)
             # sinon ajouter le numéro ID indiqué à la liste des joueurs
             elif number_in_list > 0:
-                print()
                 player_id = list_player_id[number_in_list - 1]
             self.players.append(player_id)
 
@@ -98,6 +96,11 @@ class ControllerTournaments:
     def run(self):
         new_tournament: Tournament
         self.view.clear_screen()
+        # afficher le menu, afin d'ajouter un joueur au club ou autre
+        load = self.menu_players_and_lists()
+        if load == 'load':
+            return
+        self.view.clear_screen()
         # ajouter un tournoi à la liste des tournaments actif, dans le cas futur
         # où plusieurs tournois seront joués en même temps et stock dans la DB le nom
         if not self.tournaments.tournaments_actif:
@@ -123,7 +126,6 @@ class ControllerTournaments:
         # et initialiser son score si le joueur n'était pas dans le tournoi
         list_players = PlayersId.ids_to_dicts(self.players)
         for player, player_id in zip(list_players, self.players):
-            print(player['tournaments'])
             if_exist = False
             for player_tournament in player['tournaments']:
                 if new_tournament['name'] == player_tournament[0]:
@@ -131,6 +133,7 @@ class ControllerTournaments:
             if not if_exist:
                 player['tournaments'].append([new_tournament['name'], 0])
             player['score'] = 0
+            player['opponents'] = []
             player.modify(player, player_id)
 
         # Détermination du numéro du round en cours
@@ -153,7 +156,7 @@ class ControllerTournaments:
                 round_x['name'] = f"Round {i}"
 
                 # Listes des matchs
-                round_x['list_matches'] = self.method_calcul_round.run(self.players)
+                round_x['list_matches'] = self.method_calcul_round.run(self.players, i)
 
                 # Stockage du round dans le tournoi et sauvegarde du tournoi
                 new_tournament['rounds'].append(round_x)
@@ -232,6 +235,6 @@ class ControllerTournaments:
             i += 1
 
         text = f"Tournoi finis le {new_tournament['date_end']} à " \
-               f"{new_tournament['rounds'][nb_round_max]['finish_date']}"
+               f"{new_tournament['rounds'][nb_round_max-1]['finish_date']}"
         self.view.menu_manage_club_case_2_print(text)
         self.fin = 1

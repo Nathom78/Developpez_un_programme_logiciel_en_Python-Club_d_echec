@@ -1,7 +1,7 @@
 from typing import List, Tuple
 from time import strftime
 from tinydb import TinyDB, where
-from models.players import PlayersId
+from models.players import PlayersId, Player
 
 PATH = 'database/tournaments.json'
 NAME_PLAYERS_TABLE = 'players'
@@ -271,31 +271,12 @@ class Match(dict):
     def match_players_ids_to_players(self):
         player1_id = self['couple_players_id'][0]
         player2_id = self['couple_players_id'][1]
-        player1 = PlayersId.id_to_dict(player1_id)
-        player2 = PlayersId.id_to_dict(player2_id)
+        [player1, player2] = PlayersId.ids_to_dicts([player1_id, player2_id])
         return [player1, player2]
 
-
-# t1 = Tournament('T1', 'Maison', 'bullet')
-# t2 = Tournament('T2', 'Home', 'bullet')
-# Tournaments.add_db_tournament(t1)
-# Tournaments.add_db_tournament(t2)
-# t1.tournament_players([1, 2, 3, 4, 5, 6, 7, 8])
-# round1 = Round()
-# round1.name = 'Round1'
-# match1 = Match([1, 2])
-# match2 = Match([3, 4])
-# match3 = Match([5, 6])
-# match4 = Match([7, 8])
-# round1.list_matches = [match1, match2, match3, match4]
-# for match in round1.list_matches:  # Peut-être supprimer round couples players
-#     match.match_result()
-# round1.list_results = [1, 1, 3, 2]
-# round1.finish_time = strftime('%H:%M:%S')
-# round1.finish_date = strftime('%d/%m/%Y')
-# print(round1)
-# round1_serialized = RoundSerialized().ready_to_save(round1)
-#
-# t1['rounds'].append(round1_serialized)
-# print(t1['rounds'])
-# t1.save()
+    def add_opponents(self):
+        [player1, player2] = self.match_players_ids_to_players()
+        player1['opponents'].append(self['couple_players_id'][1])
+        player2['opponents'].append(self['couple_players_id'][0])
+        Player.modify(player1, self['couple_players_id'][0])
+        Player.modify(player2, self['couple_players_id'][1])

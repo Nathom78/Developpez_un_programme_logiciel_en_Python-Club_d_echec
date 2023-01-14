@@ -1,5 +1,5 @@
 import string
-from tinydb import TinyDB
+from tinydb import TinyDB, where
 
 #  Path to database Tiny
 PATH = 'database/tournaments.json'
@@ -103,23 +103,49 @@ class PlayersId:
     players_IDs = []
 
     @classmethod
-    def print_list_player_sort_abc(cls, list_players_id):  # à faire mieux et ménage
+    def sort_abc(cls, list_players_id):
         list_players = cls.ids_to_dicts(list_players_id)
         list_sort = sorted(list_players, key=lambda player: player['family_name'])
+        return list_sort
+
+    @classmethod
+    def sort_rank(cls, list_players_id):
+        """
+        Rangé du plus grand rang au plus petit
+        :param list_players_id:
+        :return: LIST[Player]
+        """
+        list_players = cls.ids_to_dicts(list_players_id)
+        list_sort = sorted(list_players, key=lambda player: player['ranking'],
+                           reverse=True)
+        return list_sort
+
+    @classmethod
+    def sort_score(cls, list_players_id):
+        """
+        Rangé du plus grand score dans le tournoi au plus petit
+        :param list_players_id:
+        :return: LIST[Player]
+        """
+        list_players = cls.ids_to_dicts(list_players_id)
+        list_sort = sorted(list_players, key=lambda player: (player['score'], player['ranking']),
+                           reverse=True)
+        return list_sort
+
+    @classmethod
+    def print_list_player_sort_abc(cls, list_players_id):
+        list_sort = cls.sort_abc(list_players_id)
         text = ""
         for x in range(len(list_sort)):
-            text += f"Joueur {x + 1}:\n{list_sort[x]}"
+            text += f"\nJoueur {x + 1}:\n{list_sort[x]}"
         return text
 
     @classmethod
-    def print_list_player_sort_rank(cls, list_players_id):  # à faire mieux et ménage
-        players = cls.ids_to_dicts(list_players_id)
-
-        players_sorted = sorted(players, key=lambda player: player['ranking'],
-                                reverse=True)
+    def print_list_player_sort_rank(cls, list_players_id):
+        players_sorted = cls.sort_rank(list_players_id)
         text = ""
         for x in range(len(players_sorted)):
-            text += f"Joueur {x + 1}:\n{players_sorted[x]}"
+            text += f"\nJoueur {x + 1}:\n{players_sorted[x]}"
         return text
 
     @classmethod
@@ -183,14 +209,12 @@ class PlayersId:
         players_table = db.table(NAME_PLAYERS_TABLE)
         return players_table.get(doc_id=player_id)
 
+    @staticmethod
+    def get_id(player_family_name, player_first_name):
+        db = TinyDB(PATH)
+        players_table = db.table(NAME_PLAYERS_TABLE)
+        el = players_table.get((where("family_name") == player_family_name) &
+                               (where("first_name") == player_first_name))
 
-# for i in range(8):
-#    Player.create(Player(f"Lebon{i + 1}", "Paul", "21/06/1969", "M", 15 + i))
-
-# adidas = PlayersId()
-# adidas.load_all()
-# tom = adidas.players_IDs
-# print(adidas.players_IDs)
-# adidas.print_list_club(0)
-# print(adidas.id_to_dict(3))
-# print((Player.correspond_player(Player("Lebon", "Paul", "21/06/1969", "M", 15))))
+        nb_id = el.doc_id
+        return nb_id

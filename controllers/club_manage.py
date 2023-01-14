@@ -42,13 +42,16 @@ class ControllerMenu:
         #   ○	par ordre alphabétique ;
         #   ○	par classement.
         elif choice == 2:
+            # choix du tournoi
             Tournaments.load_all()
             name_tournament = self.view.menu_manage_club_case_2_2_choice(
                 Tournaments.list_tournament)
             if name_tournament == 0:
                 return
             tournament = Tournament.load(name_tournament)
+            # choix du classement
             sort = self.view.menu_manage_club_case_2_a()
+            # Affichage
             text = ""
             if sort == 1:
                 text = PlayersId.print_list_player_sort_abc(tournament['players'])
@@ -86,6 +89,7 @@ class ControllerMenu:
                 return
             tournament: Tournament = Tournament.load(name_tournament)
             for ronde in tournament['rounds']:
+                print(ronde['name'])
                 for match in ronde['list_matches']:
 
                     try:
@@ -107,7 +111,7 @@ class ControllerMenu:
                             winner = "match nul"
                         text = f"Match {player1['family_name']} {player1['first_name']} " \
                                f"contre {player2['family_name']} {player2['first_name']}\n" \
-                               f"Le gagnant est : {winner}"
+                               f"Le gagnant est : {winner}\n"
                     self.view.menu_manage_club_case_2_print(text)
         return
 
@@ -160,8 +164,3 @@ class ControllerMenu:
             if menu == 'load':
                 return 'load'
         return
-
-# from views.base import View
-#
-# new = ControllerMenuPlayersLists(View)
-# new.run()
