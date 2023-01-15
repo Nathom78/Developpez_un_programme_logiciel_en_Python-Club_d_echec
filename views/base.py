@@ -283,7 +283,7 @@ class View:
     def menu_manage_club_case_3_2(player):
         """
         Prompt for modify a Player
-        :param player:
+        :param player: Player
         :return: player modify
         """
 
@@ -354,7 +354,7 @@ class View:
             score = input("Rentrer le score total dans le tournoi : "
                           f" {player['score']}")
             if score == "":
-                if_number = True
+                break
             try:
                 score = int(score)
                 if score < 0:
@@ -370,6 +370,7 @@ class View:
     def menu_manage_club_case_3_3(text):
         """ print modify state"""
         print(text)
+        sleep(2)
 
     @staticmethod
     def menu_manage_club_case_4_choice(tournaments):

@@ -118,22 +118,27 @@ class ControllerMenu:
         return
 
     def case_3(self):  # 3) Modifier un joueur
+        # afficher la list du club afin de choisir le joueur
         text = PlayersId.print_list_club()
         nb_player = len(PlayersId.players_IDs)
         player_id = self.view.menu_manage_club_case_3_1(text, nb_player)
+        # modification des valeurs par la vue
         player = PlayersId.id_to_dict(player_id)
         player_modify = self.view.menu_manage_club_case_3_2(player)
+        # enregistrement du joueur et dire ok
+        text2 = ""
         try:
             ok = Player.modify(player_modify, player_id)
             if ok == "ok":
-                text = f"Joueur {player_modify['family_name']}" \
+                text2 = f"Joueur {player_modify['family_name']}" \
                        f" {player_modify['first_name']} est bien modifié"
         except ValueError:
-            text = f"Joueur {player_modify['family_name']} " \
+            text2 = f"Joueur {player_modify['family_name']} " \
                    f"{player_modify['first_name']} n'a pas été enregistré, veuillez avertir " \
                    "l'administrateur"
         finally:
-            self.view.menu_manage_club_case_3_3(text)
+            self.view.menu_manage_club_case_3_3(text2)
+        return
 
     def case_4(self):  # 4) Enregistrer le tournoi
         tournaments = Tournaments.tournaments_actif

@@ -79,18 +79,18 @@ class Player(dict):
         :param player_id:
         :return: ok or error
         """
-        try:
-            if not isinstance(player_modify, Player):
-                player_modify = Player.correspond_player(player_modify)
-            if isinstance(player_modify, Player):
-                db = TinyDB(PATH)
-                players_table = db.table(NAME_PLAYERS_TABLE)
-                doc_id_return = players_table.update(player_modify, doc_ids=[player_id])
-                if doc_id_return == player_id:
-                    return "ok"
-        except ValueError as error:
+        if not isinstance(player_modify, Player):
+            player_modify = Player.correspond_player(player_modify)
+        if isinstance(player_modify, Player):
+            db = TinyDB(PATH)
+            players_table = db.table(NAME_PLAYERS_TABLE)
+            doc_id_return = players_table.update(player_modify, doc_ids=[player_id])
+            if doc_id_return == [player_id]:
+                return "ok"
+        else:
             print("Uh oh, unexpected error occurred!")
-            raise error
+            raise ValueError
+        return
 
 
 class PlayersId:
