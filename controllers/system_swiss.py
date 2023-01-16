@@ -54,6 +54,7 @@ class ControllerSwiss:
             if nb_players % 2 != 0:
                 raise Exception("Nombre de joueur impair")
             nb_match = int(nb_players / 2)
+
             # tableau des adversaires disponibles pour chaque joueur
             x = 0
             unwanted_opponents = []
@@ -76,16 +77,22 @@ class ControllerSwiss:
             time = datetime.now()
             wtd = time + timedelta(seconds=10)
             while len(self.list_match) < nb_match:
+                # prendre le premier de la liste pour le joueur 1
                 player1_id = list_player_opponent[0][0]
+                # Et essayer les suivants pour le joueur 2
                 for player2_id, opponents_possible in list_player_opponent[1:]:
                     if player1_id in opponents_possible:
                         match = Match([player1_id, player2_id])
                         tournament.add_opponent(player1_id, player2_id)
                         self.list_match.append(match)
+                        # enleve le premier joueur
                         del list_player_opponent[0]
+                        # enleve le deuxième joueur
                         list_player_opponent.remove((player2_id, opponents_possible))
                         break
                 now = datetime.now()
+                # faire plus propre en rajoutant un for du nb_match, et sinon effacer les matchs,
+                # refaire list_player_opponent et jusqu' refaire opponents possible
                 if now > wtd:
                     break
 
