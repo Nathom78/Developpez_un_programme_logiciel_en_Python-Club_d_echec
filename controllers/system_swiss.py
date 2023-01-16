@@ -2,6 +2,7 @@ from models.players import PlayersId
 from models.tournament import Match, Tournament
 from typing import List
 from random import choice
+from datetime import datetime, timedelta
 
 
 class ControllerSwiss:
@@ -72,6 +73,8 @@ class ControllerSwiss:
             list_player_opponent = list(zip(list_ids_sort, opponents_possible))
 
             # créations des matchs
+            time = datetime.now()
+            wtd = time + timedelta(seconds=10)
             while len(self.list_match) < nb_match:
                 player1_id = list_player_opponent[0][0]
                 for player2_id, opponents_possible in list_player_opponent[1:]:
@@ -82,6 +85,9 @@ class ControllerSwiss:
                         del list_player_opponent[0]
                         list_player_opponent.remove((player2_id, opponents_possible))
                         break
+                now = datetime.now()
+                if now > wtd:
+                    break
 
         return self.list_match
 

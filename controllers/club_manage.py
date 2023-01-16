@@ -155,7 +155,11 @@ class ControllerMenu:
         return 'load'
 
     @staticmethod
-    def case_6():  # 6) retour
+    def case_6():  # 6) Quitter
+        exit()
+
+    @staticmethod
+    def case_7():  # 7) Continuer
         return 'quit'
 
     def choice(self, cases):

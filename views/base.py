@@ -101,19 +101,20 @@ class View:
         """
         Return : choix dans le menu
         """
+        print("\nMenu gestion du club")
         print("\n1) Enregistrer un nouveau joueur\n2) Listes\n"
               "3) Modifier un joueur\n4) Enregistrer le tournoi\n5) Charger un tournoi"
-              "\n6) Continuer\n")
+              "\n6) Quitter le programme\n7) Continuer\n")
         choice = 0
         if_number = False
         while not if_number:
             choice = input("Votre choix : ")
             try:
                 choice = int(choice)
-                if 0 < choice <= 6:  # number max in menu...
+                if 0 < choice <= 7:  # number max in menu...
                     if_number = True
             except ValueError:
-                print("Veuillez taper un nombre entre 1 et 6")
+                print("Veuillez taper un nombre entre 1 et 7")
         return choice
 
     @staticmethod

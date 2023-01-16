@@ -102,7 +102,6 @@ class ControllerTournaments:
         load = self.menu_players_and_lists()
         if load == 'load':
             return
-        self.view.clear_screen()
         # ajouter un tournoi à la liste des tournaments actif, dans le cas futur
         # où plusieurs tournois seront joués en même temps et stock dans la DB le nom
         if not self.tournaments.tournaments_actif:
@@ -156,8 +155,9 @@ class ControllerTournaments:
                 round_x['name'] = f"Round {i}"
 
                 # Listes des matchs
-                round_x['list_matches'] = self.method_calcul_round.run(self.players, new_tournament,
-                                                                       i)
+                while len(round_x['list_matches']) < 4:
+                    round_x['list_matches'] = self.method_calcul_round.run(self.players,
+                                                                           new_tournament, i)
                 # Stockage du round dans le tournoi et sauvegarde du tournoi
                 new_tournament['rounds'].append(round_x)
                 new_tournament.save()
