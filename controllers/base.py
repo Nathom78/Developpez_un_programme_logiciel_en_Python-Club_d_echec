@@ -245,6 +245,10 @@ class ControllerTournaments:
             i += 1
 
         text = f"Tournoi finis le {new_tournament['date_end']} à " \
-               f"{new_tournament['rounds'][nb_round_max-1]['finish_date']}"
+               f"{new_tournament['rounds'][nb_round_max-1]['finish_date']}\n"
         self.view.menu_manage_club_case_2_print(text)
+        list_sort = PlayersId.sort_score(self.players)
+        self.view.menu_manage_club_case_2_print("Classement du premier au dernier :\n")
+        for player in list_sort:
+            self.view.menu_manage_club_case_2_print(player)
         self.fin = 1
