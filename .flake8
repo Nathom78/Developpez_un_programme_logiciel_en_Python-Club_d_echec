@@ -2,5 +2,5 @@
 exclude =
     .git,
     __pycache__,
-    env/,
+    .env/,
 max-line-length = 119

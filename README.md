@@ -2,8 +2,11 @@
 Projet OpenClassrooms
 ## P4 - Formation Développeur Python
 
-Objectif: 
-http://books.toscrape.com/
+Objectif : 
+Ecrire un outil qui permette de gérer les tournois d'échec pour aider le club, mais qui fonctionne hors ligne.
+Suivre la conception Modèle-Vue-Contrôleur (MVC).
+Les enregistrements des parties se font en local, pour ce projet nous utilisons TinyDB, (doc)[https://tinydb.readthedocs.io/en/latest/]
+[lien du projet](http://course.oc-static.com/projects/Python+FR/P4+-+D%C3%A9veloppez+un+programme+logiciel+en+utilisant+Python/AncienneVersion-De%CC%81veloppez+un+programme+logiciel+en+Python.pdf)
 
 Vous pouvez retrouver en .docx [les spécifications technique](https://s3-eu-west-1.amazonaws.com/course.oc-static.com/projects/Python%20FR/P4%20-%20D%C3%A9veloppez%20un%20programme%20logiciel%20en%20utilisant%20Python/Centre%20%C3%A9checs%20-%20sp%C3%A9cification%20technique.docx)
 ### Prérequis

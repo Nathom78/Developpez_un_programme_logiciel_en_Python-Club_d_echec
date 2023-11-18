@@ -1,6 +1,7 @@
 
-env/
-database/db.json
+.env/
+database/*
+
 
 
 
