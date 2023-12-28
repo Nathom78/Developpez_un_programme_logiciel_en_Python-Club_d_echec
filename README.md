@@ -2,11 +2,14 @@
 Projet OpenClassrooms
 ## P4 - Formation Développeur Python
 
-Objectif : 
+Objectif :
+
+[lien du projet](http://course.oc-static.com/projects/Python+FR/P4+-+D%C3%A9veloppez+un+programme+logiciel+en+utilisant+Python/AncienneVersion-De%CC%81veloppez+un+programme+logiciel+en+Python.pdf)
+
 Ecrire un outil qui permette de gérer les tournois d'échec pour aider le club, mais qui fonctionne hors ligne.
 Suivre la conception Modèle-Vue-Contrôleur (MVC).
-Les enregistrements des parties se font en local, pour ce projet nous utilisons TinyDB, (doc)[https://tinydb.readthedocs.io/en/latest/]
-[lien du projet](http://course.oc-static.com/projects/Python+FR/P4+-+D%C3%A9veloppez+un+programme+logiciel+en+utilisant+Python/AncienneVersion-De%CC%81veloppez+un+programme+logiciel+en+Python.pdf)
+Les enregistrements des parties se font en local, pour ce projet nous utilisons  [TinyDB](https://tinydb.readthedocs.io/en/latest/).
+
 
 Vous pouvez retrouver en .docx [les spécifications technique](https://s3-eu-west-1.amazonaws.com/course.oc-static.com/projects/Python%20FR/P4%20-%20D%C3%A9veloppez%20un%20programme%20logiciel%20en%20utilisant%20Python/Centre%20%C3%A9checs%20-%20sp%C3%A9cification%20technique.docx)
 ### Prérequis
@@ -66,7 +69,7 @@ Il ne reste plus qu'à lancer le programme main.py, toujours depuis le terminal,
 
 ## 5. Rapport Flake8 
 
-[Edit on GitHub](https://github.com/PyCQA/flake8/blob/5e99de7209fc5278c73d242dfd27522a924ff8f6/docs/source/index.rst)
+[Flake8 on Github ](https://github.com/PyCQA/flake8/blob/5e99de7209fc5278c73d242dfd27522a924ff8f6/docs/source/index.rst)
 
 Un fichier de configuration de Flake8 est créé à la racine .flake8.
 Il contient :
